@@ -5,15 +5,12 @@
 template <typename T>
 class Population {
 private:
-
     std::vector<Genotype<T>> _genotypes;
     Population() = default;
 
 public:
-
     Population(const std::vector<Genotype<T>> &genotypes);
     std::vector<Genotype<T>> &getGenotypes();
-
 };
 
 template <typename T>
@@ -22,6 +19,6 @@ Population<T>::Population(const std::vector<Genotype<T>> &genotypes) : _genotype
 }
 
 template <typename T>
-std::vector<Genotype<T>> &getGenotypes() {
+std::vector<Genotype<T>>& Population::getGenotypes() {
     return _genotypes;
 }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Population.hpp"
+
 class MutationStrategy {
 public:
     virtual ~MutationStrategy() = default;
-    virtual void mutate(const Population &population);
+    template <typename T>
+    virtual void mutate(const Population<T> &population) = 0;
 };

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Population.hpp"
+
 class CrossoverStrategy {
 public:
     virtual ~CrossoverStrategy() = default;
-    virtual void cross(const Popuplation &population) = 0;
+    template <typename T>
+    virtual void cross(const Population<T> &population) = 0;
 };
