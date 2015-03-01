@@ -2,9 +2,9 @@
 
 #include "Genotype.hpp"
 
+template <typename T>
 class Evaluator {
 public:
     virtual ~Evaluator() = default;
-    template <typename T>
-    virtual double evalute(const Genotype<T> &genotype) = 0;
+    virtual double evaluate(Genotype<T> &genotype) const = 0;
 };

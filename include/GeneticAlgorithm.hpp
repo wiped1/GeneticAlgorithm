@@ -7,3 +7,4 @@
 #include "Evaluator.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
+#include "SelectionStrategy.hpp"
