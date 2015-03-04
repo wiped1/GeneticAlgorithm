@@ -7,21 +7,11 @@
 
 // anonymous namespace to prevent linker errors
 namespace {
-class IntGenotypeInitializer : public GenotypeInitializer<int> {
-public:
-    virtual void initialize(std::vector<int> &genes) {
-        // 10 is the size of the genotype
-        for (int i = 0; i < 10; i++) {
-            genes.push_back(rand() % 10);
-        }
-    }
-};
-
 class IntGenotypeEvaluator : public Evaluator<int> {
 public:
     virtual double evaluate(Genotype<int> &genotype) const {
         double score = 0;
-        for (int i = 0; i < genotype.getGenes().size(); i++) {
+        for (unsigned int i = 0; i < genotype.getGenes().size(); i++) {
             score += genotype.getGenes().at(i);
         }
         return score;
@@ -31,41 +21,27 @@ public:
 
 SCENARIO("SelectionStrategy removes half of a Population that has lower fitness") {
     GIVEN("A population of genotypes with integer genes") {
-        IntGenotypeInitializer initializer {};
-        PopulationInitializer<int> popInitializer {initializer, 10};
-        Population<int> pop {popInitializer};
+        std::vector<Genotype<int>> genotypes;
+        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {0})}));
+        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {1})}));
+        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {2})}));
+        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {3})}));
+        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {4})}));
+        Population<int> pop {std::move(genotypes)};
+
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            SelectionStrategy<int> selector {evaluator};
+            SelectionStrategy<int> selectionStrategy {evaluator};
+            selectionStrategy.eliminate(pop);
 
-            // TODO wywalić i zamienić na osobny test
-            double scoreBefore[10];
-            for ( int i = 0; i < 10; i++ ) {
-                scoreBefore[i] = evaluator.evaluate(pop.getGenotypes().at(i));
-            }
-
-            selector.eliminate(pop);
             THEN("Population size has shrunken in half") {
-                REQUIRE(pop.getGenotypes().size() == 5);
+                REQUIRE(pop.getGenotypes().size() == 2);
             }
 
-            // TODO wywalić i zamienić na osobny test
-            double scoreAfter[pop.getGenotypes().size()];
-            for ( int i = 0; i < pop.getGenotypes().size(); i++ ) {
-                scoreAfter[i] = evaluator.evaluate(pop.getGenotypes().at(i));
+            THEN("Genotypes that are left have highest scores") {
+                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 4);
+                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 3);
             }
-
-            // TODO wywalić i zamienić na osobny test
-            for ( int i = 0; i < 10; i++ ) {
-                std::cout << scoreBefore[i] << ", ";
-            }
-            std::cout << std::endl;
-
-            // TODO wywalić i zamienić na osobny test
-            for ( int i = 0; i < pop.getGenotypes().size(); i++) {
-                std::cout << scoreAfter[i] << ", ";
-            }
-            std::cout << std::endl;
         }
     }
 }

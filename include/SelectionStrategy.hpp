@@ -36,5 +36,6 @@ void SelectionStrategy<T>::eliminate(Population<T> &population) {
         return firstScore > secondScore;
     });
 
+    // in case of even number of elements it's result is rounded down
     genotypes.erase(genotypes.begin() + genotypes.size() / 2, genotypes.end());
 }
