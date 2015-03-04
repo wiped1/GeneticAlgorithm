@@ -10,7 +10,8 @@ private:
 
 public:
     Genotype(GenotypeInitializer<T> &initializer);
-    Genotype(const std::vector<T>& _genes);
+    Genotype(const std::vector<T>& genes);
+    Genotype(std::vector<T>&& genes);
     std::vector<T>& getGenes();
 };
 
@@ -21,6 +22,11 @@ Genotype<T>::Genotype(GenotypeInitializer<T> &initializer) : _genes() {
 
 template <typename T>
 Genotype<T>::Genotype(const std::vector<T>& genes) : _genes(genes) {
+    // do nothing
+}
+
+template <typename T>
+Genotype<T>::Genotype(std::vector<T>&& genes) : _genes(std::move(genes)) {
     // do nothing
 }
 
