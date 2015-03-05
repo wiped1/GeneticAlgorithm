@@ -6,5 +6,5 @@ template <typename T>
 class MutationStrategy {
 public:
     virtual ~MutationStrategy() = default;
-    virtual void mutate(const Population<T> &population) = 0;
+    virtual void mutate(Population<T>& population) = 0;
 };
