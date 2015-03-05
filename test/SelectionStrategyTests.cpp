@@ -28,7 +28,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             Genotype<int>{std::vector<int>{3}},
             Genotype<int>{std::vector<int>{4}}
         };
-        Population<int> pop {std::move(genotypes)};
+        Population<int> pop {genotypes};
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
