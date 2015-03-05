@@ -26,7 +26,7 @@ Genotype<T>::Genotype(const std::vector<T>& genes) : _genes(genes) {
 }
 
 template <typename T>
-Genotype<T>::Genotype(std::vector<T>&& genes) : _genes(std::move(genes)) {
+Genotype<T>::Genotype(std::vector<T>&& genes) : _genes(genes) {
     // do nothing
 }
 

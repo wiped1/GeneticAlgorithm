@@ -22,11 +22,11 @@ public:
 SCENARIO("SelectionStrategy removes half of a Population that has lower fitness") {
     GIVEN("A population of genotypes with integer genes") {
         std::vector<Genotype<int>> genotypes;
-        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {0})}));
-        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {1})}));
-        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {2})}));
-        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {3})}));
-        genotypes.push_back(std::move(Genotype<int>{std::move(std::vector<int> {4})}));
+        genotypes.emplace_back(std::vector<int> {0});
+        genotypes.emplace_back(std::vector<int> {1});
+        genotypes.emplace_back(std::vector<int> {2});
+        genotypes.emplace_back(std::vector<int> {3});
+        genotypes.emplace_back(std::vector<int> {4});
         Population<int> pop {std::move(genotypes)};
 
         WHEN("Population is evaluated") {

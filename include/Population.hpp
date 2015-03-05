@@ -27,7 +27,7 @@ Population<T>::Population(const std::vector<Genotype<T>>& genotypes) : _genotype
 }
 
 template <typename T>
-Population<T>::Population(std::vector<Genotype<T>>&& genotypes) : _genotypes(std::move(genotypes)) {
+Population<T>::Population(std::vector<Genotype<T>>&& genotypes) : _genotypes(genotypes) {
     // do nothing
 }
 
