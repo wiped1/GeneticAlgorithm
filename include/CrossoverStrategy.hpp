@@ -2,9 +2,9 @@
 
 #include "Population.hpp"
 
+template <typename T>
 class CrossoverStrategy {
 public:
     virtual ~CrossoverStrategy() = default;
-    template <typename T>
-    virtual void cross(const Population<T> &population) = 0;
+    virtual void cross(Population<T>& population) = 0;
 };

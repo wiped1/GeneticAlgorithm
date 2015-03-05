@@ -2,9 +2,9 @@
 
 #include "Population.hpp"
 
+template <typename T>
 class MutationStrategy {
 public:
     virtual ~MutationStrategy() = default;
-    template <typename T>
-    virtual void mutate(const Population<T> &population) = 0;
+    virtual void mutate(Population<T>& population) = 0;
 };
