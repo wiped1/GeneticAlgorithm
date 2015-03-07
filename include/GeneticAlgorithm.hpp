@@ -8,3 +8,4 @@
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
 #include "SelectionStrategy.hpp"
+#include "EvolvingProcess.hpp"
