@@ -10,14 +10,14 @@ private:
     Population() = default;
 
 public:
-    Population(const PopulationInitializer<T>& initializer);
+    Population(const PopulationInitializer<T>& populationInitializer);
     Population(std::vector<Genotype<T>> genotypes);
     std::vector<Genotype<T>>& getGenotypes();
 };
 
 template <typename T>
-Population<T>::Population(const PopulationInitializer<T>& initializer) : _genotypes() {
-    initializer.initialize(_genotypes);
+Population<T>::Population(const PopulationInitializer<T>& populationInitializer) : _genotypes() {
+    populationInitializer.initialize(_genotypes);
 }
 
 template <typename T>

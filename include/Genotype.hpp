@@ -9,14 +9,14 @@ private:
     std::vector<T> _genes;
 
 public:
-    Genotype(const GenotypeInitializer<T>& initializer);
+    Genotype(const GenotypeInitializer<T>& genotypeInitializer);
     Genotype(std::vector<T> genes);
     std::vector<T>& getGenes();
 };
 
 template <typename T>
-Genotype<T>::Genotype(const GenotypeInitializer<T>& initializer) : _genes() {
-    initializer.initialize(_genes);
+Genotype<T>::Genotype(const GenotypeInitializer<T>& genotypeInitializer) : _genes() {
+    genotypeInitializer.initialize(_genes);
 }
 
 template <typename T>
