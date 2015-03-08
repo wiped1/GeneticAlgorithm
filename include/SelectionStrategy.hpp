@@ -7,31 +7,22 @@
 
 template <typename T>
 class SelectionStrategy {
-private:
-    const Evaluator<T> &_evaluator;
 public:
-    SelectionStrategy(const Evaluator<T> &evaluator);
     virtual ~SelectionStrategy() = default;
     /*
         Standard implementation of eliminate function eliminates lesser half
         of the population.
      */
-    virtual void eliminate(Population<T> &population);
+    virtual void eliminate(Population<T> &population, const Evaluator<T> &evaluator);
 };
 
 template <typename T>
-SelectionStrategy<T>::SelectionStrategy(const Evaluator<T> &evaluator) : _evaluator(evaluator) {
-    // do nothing
-}
-
-template <typename T>
-void SelectionStrategy<T>::eliminate(Population<T> &population) {
+void SelectionStrategy<T>::eliminate(Population<T> &population, const Evaluator<T>& evaluator) {
     auto& genotypes = population.getGenotypes();
 
-    // TODO move to another class?
-    std::sort(genotypes.begin(), genotypes.end(), [this](Genotype<T> first, Genotype<T> second) {
-        double firstScore = _evaluator.evaluate(first);
-        double secondScore = _evaluator.evaluate(second);
+    std::sort(genotypes.begin(), genotypes.end(), [&evaluator](Genotype<T> first, Genotype<T> second) {
+        double firstScore = evaluator.evaluate(first);
+        double secondScore = evaluator.evaluate(second);
 
         return firstScore > secondScore;
     });

@@ -6,5 +6,5 @@ template <typename T>
 class CrossoverStrategy {
 public:
     virtual ~CrossoverStrategy() = default;
-    virtual void cross(Population<T>& population) = 0;
+    virtual void cross(Population<T>& population) const = 0;
 };

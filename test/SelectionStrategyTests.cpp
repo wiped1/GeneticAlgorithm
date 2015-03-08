@@ -32,8 +32,8 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            SelectionStrategy<int> selectionStrategy {evaluator};
-            selectionStrategy.eliminate(pop);
+            SelectionStrategy<int> selectionStrategy;
+            selectionStrategy.eliminate(pop, evaluator);
 
             THEN("Population size has shrunken in half") {
                 REQUIRE(pop.getGenotypes().size() == 2);

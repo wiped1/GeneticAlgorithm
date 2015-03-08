@@ -3,6 +3,7 @@
 #include "EvolvingProcess.hpp"
 #include "GenotypeInitializer.hpp"
 #include "Evaluator.hpp"
+#include "SelectionStrategy.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
 
@@ -10,7 +11,9 @@ namespace {
 class MockGenotypeInitializer : public GenotypeInitializer<int> {
 public:
     virtual void initialize(std::vector<int> &genes) const {
-        // do nothing
+        for (int i = 0; i < 10; i++) {
+            genes.emplace_back(0);
+        }
     }
 };
 
@@ -21,37 +24,44 @@ public:
     }
 };
 
+class MockSelectionStrategy : public SelectionStrategy<int> {
+
+};
+
 class MockCrossoverStrategy : public CrossoverStrategy<int> {
 public:
-    virtual void cross(Population<int> &population) {
+    virtual void cross(Population<int> &population) const {
         // do nothing
     }
 };
 
 class MockMutationStrategy : public MutationStrategy<int> {
 public:
-    virtual void mutate(Population<int> &population) {
-
+    virtual void mutate(Population<int> &population) const {
+        // do nothing
     }
 };
 }
 
 SCENARIO("Evolving process uses objects defined by library users") {
-    EvolvingProcess<int> process;
+    EvolvingProcess<int> process(10);
 
     GIVEN("A mock GenotypeInitializer, Evaluator, CrossoverStrategy, and MutationStrategy implementations") {
         MockGenotypeInitializer genotypeInitializer;
         MockEvaluator evaluator;
+        MockSelectionStrategy selectionStrategy;
         MockCrossoverStrategy crossoverStrategy;
         MockMutationStrategy mutationStrategy;
 
         WHEN("Dependencies are injected") {
-            process << genotypeInitializer << evaluator << crossoverStrategy << mutationStrategy;
+            process << genotypeInitializer << evaluator << crossoverStrategy <<
+                    mutationStrategy << selectionStrategy;
 
             // great test...
             THEN("Nothing happens.") {
-                // nothing
+                process.evolve();
             }
         }
     }
 }
+
