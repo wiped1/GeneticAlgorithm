@@ -44,24 +44,13 @@ public:
 }
 
 SCENARIO("Evolving process uses objects defined by library users") {
-    EvolvingProcess<int> process(10);
-
-    GIVEN("A mock GenotypeInitializer, Evaluator, CrossoverStrategy, and MutationStrategy implementations") {
-        MockGenotypeInitializer genotypeInitializer;
-        MockEvaluator evaluator;
-        MockSelectionStrategy selectionStrategy;
-        MockCrossoverStrategy crossoverStrategy;
-        MockMutationStrategy mutationStrategy;
+    GIVEN("An EvolvingProcess instantiation") {
+        EvolvingProcess<int> process(10);
 
         WHEN("Dependencies are injected") {
-            process << genotypeInitializer << evaluator << crossoverStrategy <<
-                    mutationStrategy << selectionStrategy;
-
-            /*
-                process.setTerminationCondition([]() {
-                    return
-                });
-             */
+            process << new MockGenotypeInitializer << new MockEvaluator <<
+                    new MockSelectionStrategy << new MockCrossoverStrategy <<
+                    new MockMutationStrategy;
             // great test...
             THEN("Nothing happens.") {
                 process.evolve([](auto pop, auto generations) {
@@ -73,23 +62,18 @@ SCENARIO("Evolving process uses objects defined by library users") {
 }
 
 SCENARIO("Evolving process has user defined termination condition") {
-    EvolvingProcess<int> process(10);
+    GIVEN("An EvolvingProcess instantiation") {
+        EvolvingProcess<int> process(10);
 
-    GIVEN("A mock GenotypeInitializer, Evaluator, CrossoverStrategy, and MutationStrategy implementations") {
-        MockGenotypeInitializer genotypeInitializer;
-        MockEvaluator evaluator;
-        MockSelectionStrategy selectionStrategy;
-        MockCrossoverStrategy crossoverStrategy;
-        MockMutationStrategy mutationStrategy;
-
-        process << genotypeInitializer << evaluator << crossoverStrategy <<
-                mutationStrategy << selectionStrategy;
-        WHEN("Condition function is set") {
+        process << new MockGenotypeInitializer() << new MockEvaluator() <<
+                new MockCrossoverStrategy() << new MockMutationStrategy() <<
+                new MockSelectionStrategy();
+        WHEN("Evolving process is run") {
+            process.evolve([](const Population<int>& pop,
+                    unsigned int generations) -> bool {
+                return generations >= 10;
+            });
             THEN("Evolving process quits at tenth generation") {
-                process.evolve([](const Population<int>& pop,
-                        unsigned int generations) -> bool {
-                    return generations >= 10;
-                });
                 REQUIRE(process.getNumberOfGenerations() == 10);
             }
         }
