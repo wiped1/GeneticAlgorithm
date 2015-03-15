@@ -11,10 +11,6 @@
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
 
-//inline class NullTerminationConditionException : public std::exception {
-//
-//};
-
 /* TODO spróbować stworzyć template PolymorphicDependency, który będzie posiadał
  * unique ptr jako zmienną składową i settery/gettery. EvolvingProcess będzie dziedziczył po tych
  * template'ach, dzięki czemu odwołanie do poszczególnych depsów będzie zależało od typu a nie od nazwy (którą trzeba powielać jak widać w tych prywatnych zmiennych)
