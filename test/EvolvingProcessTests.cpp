@@ -57,9 +57,40 @@ SCENARIO("Evolving process uses objects defined by library users") {
             process << genotypeInitializer << evaluator << crossoverStrategy <<
                     mutationStrategy << selectionStrategy;
 
+            /*
+                process.setTerminationCondition([]() {
+                    return
+                });
+             */
             // great test...
             THEN("Nothing happens.") {
-                process.evolve();
+                process.evolve([](auto pop, auto generations) {
+                    return true;
+                });
+            }
+        }
+    }
+}
+
+SCENARIO("Evolving process has user defined termination condition") {
+    EvolvingProcess<int> process(10);
+
+    GIVEN("A mock GenotypeInitializer, Evaluator, CrossoverStrategy, and MutationStrategy implementations") {
+        MockGenotypeInitializer genotypeInitializer;
+        MockEvaluator evaluator;
+        MockSelectionStrategy selectionStrategy;
+        MockCrossoverStrategy crossoverStrategy;
+        MockMutationStrategy mutationStrategy;
+
+        process << genotypeInitializer << evaluator << crossoverStrategy <<
+                mutationStrategy << selectionStrategy;
+        WHEN("Condition function is set") {
+            THEN("Evolving process quits at tenth generation") {
+                process.evolve([](const Population<int>& pop,
+                        unsigned int generations) -> bool {
+                    return generations >= 10;
+                });
+                REQUIRE(process.getNumberOfGenerations() == 10);
             }
         }
     }

@@ -1,13 +1,24 @@
 #pragma once
 
 #include <iostream>
+#include <functional>
 #include <memory>
+#include <exception>
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
 #include "SelectionStrategy.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
+
+//inline class NullTerminationConditionException : public std::exception {
+//
+//};
+
+/* TODO spróbować stworzyć template PolymorphicDependency, który będzie posiadał
+ * unique ptr jako zmienną składową i settery/gettery. EvolvingProcess będzie dziedziczył po tych
+ * template'ach, dzięki czemu odwołanie do poszczególnych depsów będzie zależało od typu a nie od nazwy (którą trzeba powielać jak widać w tych prywatnych zmiennych)
+ */
 
 template <typename T>
 class EvolvingProcess {
@@ -18,21 +29,26 @@ private:
     const CrossoverStrategy<T>* _crossoverStrategy;
     const MutationStrategy<T>* _mutationStrategy;
     unsigned int _populationSize;
+    unsigned int _generations;
 
 public:
     EvolvingProcess(unsigned int populationSize);
     EvolvingProcess<T>& operator<<(auto& dependency);
     EvolvingProcess<T>& use(const GenotypeInitializer<T>& genotypeInitializer);
     EvolvingProcess<T>& use(const Evaluator<T>& evaluator);
-    EvolvingProcess<T>& use(SelectionStrategy<T> selectionStrategy);
+    EvolvingProcess<T>& use(SelectionStrategy<T>& selectionStrategy);
     EvolvingProcess<T>& use(const CrossoverStrategy<T>& crossoverStrategy);
     EvolvingProcess<T>& use(const MutationStrategy<T>& mutationStrategy);
     EvolvingProcess<T>& setPopulationSize(unsigned int populationSize);
-    void evolve();
+    unsigned int getNumberOfGenerations();
+    void evolve(const std::function<bool(const Population<T>& pop,
+            unsigned int generations)>& terminationCondition);
 };
 
 template <typename T>
-EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) : _populationSize(populationSize) {
+EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) :
+        _populationSize(populationSize), _generations(0) {
+    //TODO make SelectionStrategy an interface and create default implementation for it
     _selectionStrategy = std::unique_ptr<SelectionStrategy<T>>(new SelectionStrategy<T>());
 }
 
@@ -60,7 +76,7 @@ EvolvingProcess<T>& EvolvingProcess<T>::use(const Evaluator<T>& evaluator) {
 }
 
 template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(SelectionStrategy<T> selectionStrategy) {
+EvolvingProcess<T>& EvolvingProcess<T>::use(SelectionStrategy<T>& selectionStrategy) {
     std::unique_ptr<SelectionStrategy<T>> ptr(std::make_unique<SelectionStrategy<T>>(selectionStrategy));
     _selectionStrategy = std::move(ptr);
     return *this;
@@ -85,11 +101,23 @@ EvolvingProcess<T>& EvolvingProcess<T>::setPopulationSize(unsigned int populatio
 }
 
 template <typename T>
-void EvolvingProcess<T>::evolve() {
+unsigned int EvolvingProcess<T>::getNumberOfGenerations() {
+    return _generations;
+}
+
+/* TODO change explicit Population, and generations reference to class that 'remembers'
+ * the history of specific generations (EvolvingHistory)
+ */
+template <typename T>
+void EvolvingProcess<T>::evolve(const std::function<bool(const Population<T>& pop,
+            unsigned int generations)>& terminationCondition) {
     PopulationInitializer<T> populationInitializer(*_genotypeInitializer, _populationSize);
     Population<T> pop(populationInitializer);
-    _selectionStrategy->eliminate(pop, *_evaluator);
-    _crossoverStrategy->cross(pop);
-    _mutationStrategy->mutate(pop);
+    while (!terminationCondition(pop, _generations)) {
+        _selectionStrategy->eliminate(pop, *_evaluator);
+        _crossoverStrategy->cross(pop);
+        _mutationStrategy->mutate(pop);
+        _generations++;
+    }
 }
 
