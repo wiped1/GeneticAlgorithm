@@ -12,11 +12,6 @@
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
 
-/*
- * TODO spróbować stworzyć template PolymorphicDependency, który będzie posiadał
- * unique ptr jako zmienną składową i settery/gettery. EvolvingProcess będzie dziedziczył po tych
- * template'ach, dzięki czemu odwołanie do poszczególnych depsów będzie zależało od typu a nie od nazwy (którą trzeba powielać jak widać w tych prywatnych zmiennych)
- */
 template <typename T>
 class EvolvingProcess :
         public PolymorphicDependency<GenotypeInitializer<T>>,
@@ -28,6 +23,12 @@ private:
     unsigned int _populationSize;
     unsigned int _generations;
 
+    // introduction of base classes members in order for use(auto dependency) to work
+    using PolymorphicDependency<GenotypeInitializer<T>>::set;
+    using PolymorphicDependency<Evaluator<T>>::set;
+    using PolymorphicDependency<SelectionStrategy<T>>::set;
+    using PolymorphicDependency<CrossoverStrategy<T>>::set;
+    using PolymorphicDependency<MutationStrategy<T>>::set;
     using GenotypeInitializerDependency = PolymorphicDependency<GenotypeInitializer<T>>;
     using EvaluatorDependency           = PolymorphicDependency<Evaluator<T>>;
     using SelectionStrategyDependency   = PolymorphicDependency<SelectionStrategy<T>>;
@@ -37,13 +38,7 @@ private:
 public:
     EvolvingProcess(unsigned int populationSize);
     EvolvingProcess<T>& operator<<(auto dependency);
-//    EvolvingProcess<T>& use(auto dependency);
-    EvolvingProcess<T>& use(GenotypeInitializer<T>* genotypeInitializer);
-    EvolvingProcess<T>& use(Evaluator<T>* evaluator);
-    EvolvingProcess<T>& use(SelectionStrategy<T>* selectionStrategy);
-    EvolvingProcess<T>& use(CrossoverStrategy<T>* crossoverStrategy);
-    EvolvingProcess<T>& use(MutationStrategy<T>* mutationStrategy);
-    EvolvingProcess<T>& setPopulationSize(unsigned int populationSize);
+    EvolvingProcess<T>& use(auto dependency);
     unsigned int getNumberOfGenerations();
     void evolve(const std::function<bool(const Population<T>& pop,
             unsigned int generations)>& terminationCondition);
@@ -67,49 +62,9 @@ EvolvingProcess<T>& EvolvingProcess<T>::operator<<(auto dependency) {
     return use(dependency);
 }
 
-// TODO check if possible
-// templates seem to not accept polymorphic parameters
-// meaning that if i try to use PolymorphicDependency<MockGenotypeInitializer>
-// it will not compile, as it expects GenotypeInitializer<T> (even though MockGenotypeInitializer inherits from it)
-//template <typename T>
-//EvolvingProcess<T>& EvolvingProcess<T>::use(auto dependency) {
-//    this->PolymorphicDependency<typename std::remove_pointer<decltype(dependency)>::type>::set(dependency);
-//    return *this;
-//}
-
 template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(GenotypeInitializer<T>* genotypeInitializer) {
-    GenotypeInitializerDependency::set(genotypeInitializer);
-    return *this;
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(Evaluator<T>* evaluator) {
-    EvaluatorDependency::set(evaluator);
-    return *this;
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(SelectionStrategy<T>* selectionStrategy) {
-    SelectionStrategyDependency::set(selectionStrategy);
-    return *this;
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(CrossoverStrategy<T>* crossoverStrategy) {
-    CrossoverStrategyDependency::set(crossoverStrategy);
-    return *this;
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(MutationStrategy<T>* mutationStrategy) {
-    MutationStrategyDependency::set(mutationStrategy);
-    return *this;
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::setPopulationSize(unsigned int populationSize) {
-    _populationSize = populationSize;
+EvolvingProcess<T>& EvolvingProcess<T>::use(auto dependency) {
+    set(dependency);
     return *this;
 }
 
