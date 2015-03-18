@@ -58,6 +58,14 @@ SCENARIO("Evolving process uses objects defined by library users") {
                 });
             }
         }
+
+        WHEN("All dependencies are missing") {
+            THEN("Exception is thrown") {
+                REQUIRE_THROWS(process.evolve([](auto pop, auto generations) {
+                    return true;
+                }));
+            }
+        }
     }
 }
 

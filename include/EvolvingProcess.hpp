@@ -29,6 +29,7 @@ private:
     using PolymorphicDependency<SelectionStrategy<T>>::set;
     using PolymorphicDependency<CrossoverStrategy<T>>::set;
     using PolymorphicDependency<MutationStrategy<T>>::set;
+    // aliases for easier base classes access
     using GenotypeInitializerDependency = PolymorphicDependency<GenotypeInitializer<T>>;
     using EvaluatorDependency           = PolymorphicDependency<Evaluator<T>>;
     using SelectionStrategyDependency   = PolymorphicDependency<SelectionStrategy<T>>;
@@ -80,6 +81,13 @@ unsigned int EvolvingProcess<T>::getNumberOfGenerations() {
 template <typename T>
 void EvolvingProcess<T>::evolve(const std::function<bool(const Population<T>& pop,
             unsigned int generations)>& terminationCondition) {
+    // check if all dependencies are properly initialized
+    if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
+          SelectionStrategyDependency::get() && CrossoverStrategyDependency::get() &&
+          MutationStrategyDependency::get())) {
+        throw new std::runtime_error("Dependencies aren't properly initialized. Check if all dependencies were injected.");
+    }
+
     PopulationInitializer<T> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<T> pop(populationInitializer);
     while (!terminationCondition(pop, _generations)) {
