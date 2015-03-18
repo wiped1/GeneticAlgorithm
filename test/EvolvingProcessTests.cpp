@@ -25,7 +25,10 @@ public:
 };
 
 class MockSelectionStrategy : public SelectionStrategy<int> {
-
+public:
+    virtual void eliminate(Population<int> &population, const Evaluator<int> &evaluator) {
+        // do nothing
+    }
 };
 
 class MockCrossoverStrategy : public CrossoverStrategy<int> {

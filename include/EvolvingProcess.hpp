@@ -9,6 +9,7 @@
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
 #include "SelectionStrategy.hpp"
+#include "DefaultSelectionStrategy.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
 
@@ -48,8 +49,7 @@ public:
 template <typename T>
 EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) :
         _populationSize(populationSize), _generations(0) {
-    //TODO make SelectionStrategy an interface and create default implementation for it
-    SelectionStrategyDependency::set(new SelectionStrategy<T>());
+    SelectionStrategyDependency::set(new DefaultSelectionStrategy<T>());
 }
 
 /*

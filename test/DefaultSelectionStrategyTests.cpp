@@ -1,9 +1,11 @@
 #include "Catch/catch.hpp"
 
-#include "SelectionStrategy.hpp"
+#include <iostream>
+#include "Population.hpp"
+#include "DefaultSelectionStrategy.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
-#include <iostream>
+#include "Evaluator.hpp"
 
 // anonymous namespace to prevent linker errors
 namespace {
@@ -32,7 +34,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            SelectionStrategy<int> selectionStrategy;
+            DefaultSelectionStrategy<int> selectionStrategy;
             selectionStrategy.eliminate(pop, evaluator);
 
             THEN("Population size has shrunken in half") {

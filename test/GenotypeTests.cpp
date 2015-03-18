@@ -1,7 +1,5 @@
 #include "Catch/catch.hpp"
 
-// include to test compilation
-// TODO remove
 #include "GeneticAlgorithm.hpp"
 #include "Genotype.hpp"
 #include <vector>
