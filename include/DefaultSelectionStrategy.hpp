@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SelectionStrategy.hpp"
+#include "Population.hpp"
+#include "Ranking.hpp"
 
 template <typename T>
 class DefaultSelectionStrategy : public SelectionStrategy<T> {
@@ -9,20 +11,17 @@ public:
         Standard implementation of eliminate function eliminates lesser half
         of the population.
      */
-    virtual void eliminate(Population<T> &population, const Evaluator<T> &evaluator);
+    virtual void eliminate(Population<T> &population, typename Ranking<T>::Type ranking);
 };
 
 template <typename T>
-void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, const Evaluator<T>& evaluator) {
+void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, typename Ranking<T>::Type ranking) {
     auto& genotypes = population.getGenotypes();
-
-    std::sort(genotypes.begin(), genotypes.end(), [&](Genotype<T> first, Genotype<T> second) {
-        double firstScore = evaluator.evaluate(first);
-        double secondScore = evaluator.evaluate(second);
-
-        return firstScore > secondScore;
-    });
-
-    // in case of even number of elements it's result is rounded down
-    genotypes.erase(genotypes.begin() + genotypes.size() / 2, genotypes.end());
+    auto it = ranking.begin();
+    // ranking is sorted high to low, std::advance moves iterator to the middle
+    // so the half with lesser fitness is removed
+    std::advance(it, ranking.size() / 2);
+    for (it; it != ranking.end(); it++) {
+        genotypes.erase(std::remove(genotypes.begin(), genotypes.end(), (*it).first), genotypes.end());
+    }
 }

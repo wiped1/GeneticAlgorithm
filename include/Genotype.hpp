@@ -11,6 +11,7 @@ private:
 public:
     Genotype(const GenotypeInitializer<T>& genotypeInitializer);
     Genotype(std::vector<T> genes);
+    bool operator==(const Genotype<T>& other);
     std::vector<T>& getGenes();
 };
 
@@ -22,6 +23,11 @@ Genotype<T>::Genotype(const GenotypeInitializer<T>& genotypeInitializer) : _gene
 template <typename T>
 Genotype<T>::Genotype(std::vector<T> genes) : _genes(std::move(genes)) {
     // do nothing
+}
+
+template <typename T>
+bool Genotype<T>::operator==(const Genotype<T>& other) {
+    return _genes == other._genes;
 }
 
 template <typename T>

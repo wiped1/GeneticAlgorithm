@@ -7,6 +7,7 @@
 #include "PolymorphicDependency.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
+#include "Ranking.hpp"
 #include "Evaluator.hpp"
 #include "SelectionStrategy.hpp"
 #include "DefaultSelectionStrategy.hpp"
@@ -24,6 +25,7 @@ private:
     unsigned int _populationSize;
     unsigned int _generations;
 
+    // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
     using PolymorphicDependency<GenotypeInitializer<T>>::set;
     using PolymorphicDependency<Evaluator<T>>::set;
@@ -91,7 +93,9 @@ void EvolvingProcess<T>::evolve(const std::function<bool(const Population<T>& po
     PopulationInitializer<T> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<T> pop(populationInitializer);
     while (!terminationCondition(pop, _generations)) {
-        SelectionStrategyDependency::get()->eliminate(pop, *EvaluatorDependency::get());
+        //ranking.rank(pop, evaluator, translator); // returns std::set where key is genotype reference and value is it's fitness
+        Ranking<T> ranking;
+        SelectionStrategyDependency::get()->eliminate(pop, ranking.rank(pop, *EvaluatorDependency::get()));
         CrossoverStrategyDependency::get()->cross(pop);
         MutationStrategyDependency::get()->mutate(pop);
         _generations++;

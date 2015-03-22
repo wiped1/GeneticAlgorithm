@@ -2,6 +2,7 @@
 
 #include "Genotype.hpp"
 
+// TODO add Translator that returns Phenotype and let evaluator operate on pure Phenotypes
 template <typename T>
 class Evaluator {
 public:

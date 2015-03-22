@@ -34,16 +34,17 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
+            Ranking<int> ranking;
             DefaultSelectionStrategy<int> selectionStrategy;
-            selectionStrategy.eliminate(pop, evaluator);
+            selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size has shrunken in half") {
                 REQUIRE(pop.getGenotypes().size() == 2);
             }
 
             THEN("Genotypes that are left have highest scores") {
-                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 4);
-                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 3);
+                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 3);
+                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 4);
             }
         }
     }

@@ -26,7 +26,7 @@ public:
 
 class MockSelectionStrategy : public SelectionStrategy<int> {
 public:
-    virtual void eliminate(Population<int> &population, const Evaluator<int> &evaluator) {
+    virtual void eliminate(Population<int> &population, Ranking<int>::Type ranking) {
         // do nothing
     }
 };
