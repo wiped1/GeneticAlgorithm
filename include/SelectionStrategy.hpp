@@ -1,10 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <iostream>
 #include "Population.hpp"
 #include "Evaluator.hpp"
 #include "Ranking.hpp"
-#include <algorithm>
-#include <iostream>
 
 template <typename T>
 class SelectionStrategy {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SelectionStrategy.hpp"
 #include "Population.hpp"
 #include "Ranking.hpp"
+#include "SelectionStrategy.hpp"
 
 template <typename T>
 class DefaultSelectionStrategy : public SelectionStrategy<T> {
