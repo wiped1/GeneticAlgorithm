@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(GeneticAlgorithm)
 
 # CXX flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 
 # CMake directories
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
@@ -20,11 +20,11 @@ aux_source_directory(${CMAKE_TEST_DIR} TESTS_FILES)
 add_executable(GeneticAlgorithmTests ${MAIN_TESTS_FILE} ${SOURCE_FILES} ${TESTS_FILES})
 
 # Command used to execute unit tests after build
-add_custom_command(
-    TARGET GeneticAlgorithmTests
-    POST_BUILD
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/GeneticAlgorithmTests
-)
+#add_custom_command(
+#    TARGET GeneticAlgorithmTests
+#    POST_BUILD
+#    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/GeneticAlgorithmTests
+#)
 
 enable_testing(true)
 add_test(

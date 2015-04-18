@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Population.hpp"
+
+template <typename T>
 class MutationStrategy {
 public:
     virtual ~MutationStrategy() = default;
-    virtual void mutate(const Population &population);
+    virtual void mutate(Population<T>& population) const = 0;
 };

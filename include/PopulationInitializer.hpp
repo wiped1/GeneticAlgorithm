@@ -6,25 +6,23 @@
 
 template <typename T>
 class PopulationInitializer {
-
-unsigned int _size;
-
+private:
+    unsigned int _size;
+    const GenotypeInitializer<T> &_initializer;
 public:
-
-    PopulationInitializer(unsigned int size);
-
-    void initialize(const GenotypeInitializer<T> &initializer, const std::vector<Genotype<T>> &genotypes) const;
-
-
+    PopulationInitializer(const GenotypeInitializer<T> &initializer, unsigned int size);
+    void initialize(std::vector<Genotype<T>> &genotypes) const;
 };
 
-PopulationInitializer::PopulationInitializer(unsigned int size) : _size(size) {
-
+template <typename T>
+PopulationInitializer<T>::PopulationInitializer(const GenotypeInitializer<T> &initializer,
+        unsigned int size) : _initializer(initializer), _size(size) {
+    // do nothing
 }
 
 template <typename T>
-void PopulationInitializer::initialize(const GenotypeInitializer<T> &initializer, const std::vector<Genotype<T>> &genotypes) {
+void PopulationInitializer<T>::initialize(std::vector<Genotype<T>> &genotypes) const {
     for (unsigned int i = 0; i < _size; i++) {
-        genotypes.emplace_back(initializer);
+        genotypes.emplace_back(_initializer);
     }
 }

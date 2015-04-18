@@ -1,5 +1,6 @@
 #include "Catch/catch.hpp"
 
+#include "GeneticAlgorithm.hpp"
 #include "Genotype.hpp"
 #include <vector>
 
