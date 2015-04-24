@@ -110,7 +110,7 @@ void EvolvingProcess<T>::evolve(const std::function<bool(const Population<T>& po
     PopulationInitializer<T> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<T> pop(populationInitializer);
     while (!terminationCondition(pop, _generations)) {
-        //ranking.rank(pop, evaluator, translator); // returns std::set where key is genotype reference and value is it's fitness
+        // TODO ranking.rank(pop, evaluator, translator);
         Ranking<T> ranking;
         SelectionStrategyDependency::get()->eliminate(pop, ranking.rank(pop, *EvaluatorDependency::get()));
         CrossoverStrategyDependency::get()->cross(pop);
