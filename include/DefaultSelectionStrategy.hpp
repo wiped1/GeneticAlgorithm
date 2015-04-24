@@ -17,11 +17,22 @@ public:
 template <typename T>
 void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, typename Ranking<T>::Type ranking) {
     auto& genotypes = population.getGenotypes();
-    auto it = ranking.begin();
+    // TODO rename rankingIt?
+    auto rankingIt = ranking.begin();
     // ranking is sorted high to low, std::advance moves iterator to the middle
     // so the half with lesser fitness is removed
-    std::advance(it, ranking.size() / 2);
-    for (it; it != ranking.end(); it++) {
-        genotypes.erase(std::remove(genotypes.begin(), genotypes.end(), (*it).first), genotypes.end());
+    std::advance(rankingIt, ranking.size() / 2);
+    // TODO move to separate private function
+    for (rankingIt; rankingIt != ranking.end(); rankingIt++) {
+        // iterate through vector and delete elements with the same address
+        auto genotypesIt = genotypes.begin();
+        // TODO rename genotypesIt?
+        for (genotypesIt; genotypesIt < genotypes.end(); genotypesIt++) {
+            // compare addresses of elements pointed to by iterators
+            if (&(*genotypesIt) == (*rankingIt).first) {
+                genotypes.erase(genotypesIt);
+                break;
+            }
+        }
     }
 }

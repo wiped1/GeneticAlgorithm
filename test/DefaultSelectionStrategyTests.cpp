@@ -48,4 +48,38 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             }
         }
     }
+    GIVEN("A population of 100 genotypes") {
+        std::vector<Genotype<int>> genotypes;
+        for (std::vector<Genotype<int>>::size_type i = 0; i < 100; i++) {
+            genotypes.push_back(std::vector<int>{static_cast<int>(i)});
+        }
+        Population<int> pop {genotypes};
+        WHEN("Population is evaluated") {
+            IntGenotypeEvaluator evaluator;
+            Ranking<int> ranking;
+            DefaultSelectionStrategy<int> selectionStrategy;
+            selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
+
+            THEN("Population size is exactly 50") {
+                REQUIRE(pop.getGenotypes().size() == 50);
+            }
+        }
+    }
+    GIVEN("A population of 100 genotypes with same values") {
+        std::vector<Genotype<int>> genotypes;
+        for (std::vector<Genotype<int>>::size_type i = 0; i < 100; i++) {
+            genotypes.push_back(std::vector<int>{0});
+        }
+        Population<int> pop {genotypes};
+        WHEN("Population is evaluated") {
+            IntGenotypeEvaluator evaluator;
+            Ranking<int> ranking;
+            DefaultSelectionStrategy<int> selectionStrategy;
+            selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
+
+            THEN("Population size is exactly 50") {
+                REQUIRE(pop.getGenotypes().size() == 50);
+            }
+        }
+    }
 }
