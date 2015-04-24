@@ -16,11 +16,11 @@
 
 template <typename T>
 class EvolvingProcess :
-        public PolymorphicDependency<GenotypeInitializer<T>>,
-        public PolymorphicDependency<Evaluator<T>>,
-        public PolymorphicDependency<SelectionStrategy<T>>,
-        public PolymorphicDependency<CrossoverStrategy<T>>,
-        public PolymorphicDependency<MutationStrategy<T>> {
+        private PolymorphicDependency<GenotypeInitializer<T>>,
+        private PolymorphicDependency<Evaluator<T>>,
+        private PolymorphicDependency<SelectionStrategy<T>>,
+        private PolymorphicDependency<CrossoverStrategy<T>>,
+        private PolymorphicDependency<MutationStrategy<T>> {
 private:
     unsigned int _populationSize;
     unsigned int _generations;
@@ -41,8 +41,12 @@ private:
 
 public:
     EvolvingProcess(unsigned int populationSize);
-    EvolvingProcess<T>& operator<<(auto dependency);
-    EvolvingProcess<T>& use(auto dependency);
+    template <typename Dependency>
+    EvolvingProcess<T>& operator<<(Dependency dependency);
+    template <typename Dependency>
+    EvolvingProcess<T>& use(Dependency dependency);
+//    EvolvingProcess<T>& operator<<(auto dependency);
+//    EvolvingProcess<T>& use(auto dependency);
     unsigned int getNumberOfGenerations();
     void evolve(const std::function<bool(const Population<T>& pop,
             unsigned int generations)>& terminationCondition);
@@ -54,22 +58,35 @@ EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) :
     SelectionStrategyDependency::set(new DefaultSelectionStrategy<T>());
 }
 
+template <typename T>
+template <typename Dependency>
+EvolvingProcess<T>& EvolvingProcess<T>::operator<<(Dependency dependency) {
+    return use(dependency);
+}
+
+template <typename T>
+template <typename Dependency>
+EvolvingProcess<T>& EvolvingProcess<T>::use(Dependency dependency) {
+    set(dependency);
+    return *this;
+}
+
 /*
     The pitfalls of using auto:
         when dependency was passed as (auto dependency) the code produced
         dangling pointers and caused segmentation faults.
         Solution was to use (auto& dependency).
  */
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::operator<<(auto dependency) {
-    return use(dependency);
-}
-
-template <typename T>
-EvolvingProcess<T>& EvolvingProcess<T>::use(auto dependency) {
-    set(dependency);
-    return *this;
-}
+//template <typename T>
+//EvolvingProcess<T>& EvolvingProcess<T>::operator<<(auto dependency) {
+//    return use(dependency);
+//}
+//
+//template <typename T>
+//EvolvingProcess<T>& EvolvingProcess<T>::use(auto dependency) {
+//    set(dependency);
+//    return *this;
+//}
 
 template <typename T>
 unsigned int EvolvingProcess<T>::getNumberOfGenerations() {
