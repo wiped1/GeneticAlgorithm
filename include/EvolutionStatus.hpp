@@ -2,32 +2,28 @@
 
 #include "Genotype.hpp"
 #include "Population.hpp"
+#include "ObservableEvolutionStatus.hpp"
 
 template <typename T>
-class EvolutionStatus {
+class EvolutionStatus : public ObservableEvolutionStatus<T> {
 private:
     const Genotype<T>* bestGenotype;
     const Population<T>* population;
     unsigned int numberOfGenerations;
-    float currentFitness;
-    float fitnessDelta; // difference between last fitness and current fitness
+    double currentFitness;
+    double fitnessDelta; // difference between last fitness and current fitness
 public:
-    // constructor
     EvolutionStatus(const Population<T>& population);
 
-    // getters
-    unsigned int getNumberOfGenerations();
-    // best genotype fitness of current generation
-    // TODO rename to getHighestFitness
-    float getBestFitness();
-    // difference between last best fitness and current best fitness
-    float getFitnessDelta();
-    const Genotype<T>& getGenotypeWithBestFitness();
-    const Population<T>& getPopulation();
+    virtual unsigned int getNumberOfGenerations();
+    virtual double getHighestFitness();
+    virtual double getFitnessDelta();
+    virtual const Genotype<T>& getGenotypeWithBestFitness();
+    virtual const Population<T>& getPopulation();
+    virtual unsigned int getPopulationSize() const;
 
-    // setters
     void incrementNumberOfGenerations();
-    void updateFitness(float fitness);
+    void updateFitness(double fitness);
     void setGenotypeWithBestFitness(const Genotype<T>& genotype);
 };
 
@@ -44,12 +40,12 @@ unsigned int EvolutionStatus<T>::getNumberOfGenerations() {
 }
 
 template <typename T>
-float EvolutionStatus<T>::getBestFitness() {
+double EvolutionStatus<T>::getHighestFitness() {
     return currentFitness;
 }
 
 template <typename T>
-float EvolutionStatus<T>::getFitnessDelta() {
+double EvolutionStatus<T>::getFitnessDelta() {
     return fitnessDelta;
 }
 
@@ -69,7 +65,7 @@ void EvolutionStatus<T>::incrementNumberOfGenerations() {
 }
 
 template <typename T>
-void EvolutionStatus<T>::updateFitness(float fitness) {
+void EvolutionStatus<T>::updateFitness(double fitness) {
     fitnessDelta = fitness - currentFitness;
     currentFitness = fitness;
 }
@@ -77,4 +73,9 @@ void EvolutionStatus<T>::updateFitness(float fitness) {
 template <typename T>
 void EvolutionStatus<T>::setGenotypeWithBestFitness(const Genotype<T> &genotype) {
     bestGenotype = &genotype;
+}
+
+template <typename T>
+unsigned int EvolutionStatus<T>::getPopulationSize() const {
+    return static_cast<unsigned int>(const_cast<Population<T>*>(population)->getGenotypes().size());
 }

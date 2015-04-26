@@ -27,11 +27,11 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
         }
         WHEN("Current positive fitness is higher") {
             // precheck
-            REQUIRE(status.getBestFitness() == 0);
+            REQUIRE(status.getHighestFitness() == 0);
             status.updateFitness(100);
 
             THEN("Best fitness equals 100, fitness delta equals 100") {
-                REQUIRE(status.getBestFitness() == 100);
+                REQUIRE(status.getHighestFitness() == 100);
                 REQUIRE(status.getFitnessDelta() == 100);
             }
         }
@@ -40,7 +40,7 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
             status.updateFitness(0);
 
             THEN("Best fitness equals 0, fitness delta equals -100") {
-                REQUIRE(status.getBestFitness() == 0);
+                REQUIRE(status.getHighestFitness() == 0);
                 REQUIRE(status.getFitnessDelta() == -100);
             }
         }
@@ -49,7 +49,7 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
             status.updateFitness(0);
 
             THEN("Best fitness equals 0, fitness delta equals 100") {
-                REQUIRE(status.getBestFitness() == 0);
+                REQUIRE(status.getHighestFitness() == 0);
                 REQUIRE(status.getFitnessDelta() == 100);
             }
         }
@@ -58,7 +58,7 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
             status.updateFitness(-200);
 
             THEN("Best fitness equals -200, fitness delta equals -100") {
-                REQUIRE(status.getBestFitness() == -200);
+                REQUIRE(status.getHighestFitness() == -200);
                 REQUIRE(status.getFitnessDelta() == -100);
             }
         }
@@ -68,6 +68,11 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
 
             THEN("EvolutionStatus genotype has the same address as local variable") {
                 REQUIRE(&(status.getGenotypeWithBestFitness()) == &newGenotype);
+            }
+        }
+        WHEN("Population size is queried") {
+            THEN("It's size is proper") {
+                REQUIRE(status.getPopulationSize() == 1);
             }
         }
     }

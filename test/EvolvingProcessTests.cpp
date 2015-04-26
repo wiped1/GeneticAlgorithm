@@ -6,6 +6,7 @@
 #include "SelectionStrategy.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
+#include "ObservableEvolutionStatus.hpp"
 
 namespace {
 class MockGenotypeInitializer : public GenotypeInitializer<int> {
@@ -26,7 +27,7 @@ public:
 
 class MockSelectionStrategy : public SelectionStrategy<int> {
 public:
-    virtual void eliminate(Population<int> &population, Ranking<int>::Type ranking) {
+    virtual void eliminate(Population<int> &population, Ranking<int>::CollectionType ranking) {
         // do nothing
     }
 };
@@ -56,7 +57,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
                     new MockMutationStrategy;
             // great test...
             THEN("Nothing happens.") {
-                process.evolve([](auto pop, auto generations) {
+                process.evolve([](ObservableEvolutionStatus<int>& status) {
                     return true;
                 });
             }
@@ -64,7 +65,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
         WHEN("All dependencies are missing") {
             THEN("Exception is thrown") {
-                REQUIRE_THROWS(process.evolve([](auto pop, auto generations) {
+                REQUIRE_THROWS(process.evolve([](ObservableEvolutionStatus<int>& status) {
                     return true;
                 }));
             }
@@ -80,12 +81,13 @@ SCENARIO("Evolving process has user defined termination condition") {
                 new MockCrossoverStrategy() << new MockMutationStrategy() <<
                 new MockSelectionStrategy();
         WHEN("Evolving process is run") {
-            process.evolve([](const Population<int>& pop,
-                    unsigned int generations) -> bool {
-                return generations >= 10;
+            int generations = 0;
+            process.evolve([&](ObservableEvolutionStatus<int>& status) -> bool {
+                generations++;
+                return status.getNumberOfGenerations() >= 10;
             });
             THEN("Evolving process quits at tenth generation") {
-                REQUIRE(process.getNumberOfGenerations() == 10);
+                REQUIRE(generations == 10);
             }
         }
     }
