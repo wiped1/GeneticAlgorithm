@@ -19,17 +19,17 @@ public:
         }
     };
 
-    typedef std::set<std::pair<Genotype<T>*, double>, FitnessGenotypeComparator> Type;
+    typedef std::set<std::pair<Genotype<T>*, double>, FitnessGenotypeComparator> CollectionType;
 
     /*
      * Returns std::set containing reference to Genotype<T> and it's fitness after evaluation
      */
-    Type rank(Population<T>& pop, const Evaluator<T>& evaluator);
+    CollectionType rank(Population<T>& pop, const Evaluator<T>& evaluator);
 };
 
 template <typename T>
-typename Ranking<T>::Type Ranking<T>::rank(Population<T> &pop, const Evaluator<T> &evaluator) {
-    typename Ranking<T>::Type result;
+typename Ranking<T>::CollectionType Ranking<T>::rank(Population<T> &pop, const Evaluator<T> &evaluator) {
+    typename Ranking<T>::CollectionType result;
 
     for (Genotype<T>& genotype : pop.getGenotypes()) {
         double fitness = evaluator.evaluate(genotype);

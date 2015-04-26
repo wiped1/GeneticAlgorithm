@@ -13,6 +13,8 @@
 #include "DefaultSelectionStrategy.hpp"
 #include "CrossoverStrategy.hpp"
 #include "MutationStrategy.hpp"
+#include "EvolutionStatus.hpp"
+#include "ObservableEvolutionStatus.hpp"
 
 template <typename T>
 class EvolvingProcess :
@@ -23,7 +25,6 @@ class EvolvingProcess :
         private PolymorphicDependency<MutationStrategy<T>> {
 private:
     unsigned int _populationSize;
-    unsigned int _generations;
 
     // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
@@ -45,16 +46,12 @@ public:
     EvolvingProcess<T>& operator<<(Dependency dependency);
     template <typename Dependency>
     EvolvingProcess<T>& use(Dependency dependency);
-//    EvolvingProcess<T>& operator<<(auto dependency);
-//    EvolvingProcess<T>& use(auto dependency);
-    unsigned int getNumberOfGenerations();
-    void evolve(const std::function<bool(const Population<T>& pop,
-            unsigned int generations)>& terminationCondition);
+    void evolve(const std::function<bool(ObservableEvolutionStatus<T>& status)>& terminationCondition);
 };
 
 template <typename T>
 EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) :
-        _populationSize(populationSize), _generations(0) {
+        _populationSize(populationSize) {
     SelectionStrategyDependency::set(new DefaultSelectionStrategy<T>());
 }
 
@@ -71,51 +68,35 @@ EvolvingProcess<T>& EvolvingProcess<T>::use(Dependency dependency) {
     return *this;
 }
 
-/*
-    The pitfalls of using auto:
-        when dependency was passed as (auto dependency) the code produced
-        dangling pointers and caused segmentation faults.
-        Solution was to use (auto& dependency).
- */
-//template <typename T>
-//EvolvingProcess<T>& EvolvingProcess<T>::operator<<(auto dependency) {
-//    return use(dependency);
-//}
-//
-//template <typename T>
-//EvolvingProcess<T>& EvolvingProcess<T>::use(auto dependency) {
-//    set(dependency);
-//    return *this;
-//}
-
 template <typename T>
-unsigned int EvolvingProcess<T>::getNumberOfGenerations() {
-    return _generations;
+void updateEvolutionStatus(EvolutionStatus<T>& status, const typename Ranking<T>::CollectionType& rankedGenotypes) {
+    // set is sorted high to low, first element is bound to be the one with highest fitness
+    auto it = rankedGenotypes.cbegin();
+    status.setGenotypeWithBestFitness(*(*it).first);
+    status.updateFitness((*it).second);
+    status.incrementNumberOfGenerations();
 }
 
-/*
- * TODO change explicit Population, and generations reference to class that 'remembers'
- * the history of specific generations (EvolvingHistory)
- */
 template <typename T>
-void EvolvingProcess<T>::evolve(const std::function<bool(const Population<T>& pop,
-            unsigned int generations)>& terminationCondition) {
+void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStatus<T>& status)>& terminationCondition) {
     // check if all dependencies are properly initialized
     if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
           SelectionStrategyDependency::get() && CrossoverStrategyDependency::get() &&
           MutationStrategyDependency::get())) {
-        throw new std::runtime_error("Dependencies aren't properly initialized. Check if all dependencies were injected.");
+        throw new std::runtime_error("Dependencies aren't properly initialized. "
+                                     "Check if all dependencies were injected.");
     }
 
     PopulationInitializer<T> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<T> pop(populationInitializer);
-    while (!terminationCondition(pop, _generations)) {
-        // TODO ranking.rank(pop, evaluator, translator);
+    EvolutionStatus<T> status(pop);
+    do {
         Ranking<T> ranking;
-        SelectionStrategyDependency::get()->eliminate(pop, ranking.rank(pop, *EvaluatorDependency::get()));
+        typename Ranking<T>::CollectionType rankedGenotypes = ranking.rank(pop, *EvaluatorDependency::get());
+        SelectionStrategyDependency::get()->eliminate(pop, rankedGenotypes);
         CrossoverStrategyDependency::get()->cross(pop);
         MutationStrategyDependency::get()->mutate(pop);
-        _generations++;
-    }
+        updateEvolutionStatus(status, rankedGenotypes);
+    } while (!terminationCondition(status));
 }
 

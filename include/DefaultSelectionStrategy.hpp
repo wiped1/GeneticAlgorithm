@@ -11,11 +11,11 @@ public:
         Standard implementation of eliminate function eliminates lesser half
         of the population.
      */
-    virtual void eliminate(Population<T> &population, typename Ranking<T>::Type ranking);
+    virtual void eliminate(Population<T> &population, typename Ranking<T>::CollectionType ranking);
 };
 
 template <typename T>
-void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, typename Ranking<T>::Type ranking) {
+void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, typename Ranking<T>::CollectionType ranking) {
     auto& genotypes = population.getGenotypes();
     std::vector<Genotype<T>> afterElimination;
 
