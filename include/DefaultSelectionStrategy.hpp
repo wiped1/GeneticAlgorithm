@@ -17,11 +17,15 @@ public:
 template <typename T>
 void DefaultSelectionStrategy<T>::eliminate(Population<T> &population, typename Ranking<T>::Type ranking) {
     auto& genotypes = population.getGenotypes();
+    std::vector<Genotype<T>> afterElimination;
+
+    // iterate through half with higher values
+    // and populate new vector
     auto it = ranking.begin();
-    // ranking is sorted high to low, std::advance moves iterator to the middle
-    // so the half with lesser fitness is removed
-    std::advance(it, ranking.size() / 2);
-    for (it; it != ranking.end(); it++) {
-        genotypes.erase(std::remove(genotypes.begin(), genotypes.end(), (*it).first), genotypes.end());
+    for (typename std::vector<Genotype<T>>::size_type i = 0; i < genotypes.size() / 2; i++) {
+        afterElimination.push_back(std::move(*(*it).first));
+        it++;
     }
+
+    genotypes = std::move(afterElimination);
 }

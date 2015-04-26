@@ -43,8 +43,42 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             }
 
             THEN("Genotypes that are left have highest scores") {
-                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 3);
-                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 4);
+                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 4);
+                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 3);
+            }
+        }
+    }
+    GIVEN("A population of 100 genotypes") {
+        std::vector<Genotype<int>> genotypes;
+        for (std::vector<Genotype<int>>::size_type i = 0; i < 100; i++) {
+            genotypes.emplace_back(std::vector<int>{static_cast<int>(i)});
+        }
+        Population<int> pop {genotypes};
+        WHEN("Population is evaluated") {
+            IntGenotypeEvaluator evaluator;
+            Ranking<int> ranking;
+            DefaultSelectionStrategy<int> selectionStrategy;
+            selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
+
+            THEN("Population size is exactly 50") {
+                REQUIRE(pop.getGenotypes().size() == 50);
+            }
+        }
+    }
+    GIVEN("A population of 100 genotypes with same values") {
+        std::vector<Genotype<int>> genotypes;
+        for (std::vector<Genotype<int>>::size_type i = 0; i < 100; i++) {
+            genotypes.emplace_back(std::vector<int>{0});
+        }
+        Population<int> pop {genotypes};
+        WHEN("Population is evaluated") {
+            IntGenotypeEvaluator evaluator;
+            Ranking<int> ranking;
+            DefaultSelectionStrategy<int> selectionStrategy;
+            selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
+
+            THEN("Population size is exactly 50") {
+                REQUIRE(pop.getGenotypes().size() == 50);
             }
         }
     }
