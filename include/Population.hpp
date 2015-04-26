@@ -7,9 +7,9 @@ template <typename T>
 class Population {
 private:
     std::vector<Genotype<T>> _genotypes;
-    Population() = default;
 
 public:
+    Population() = delete;
     Population(const PopulationInitializer<T>& populationInitializer);
     Population(std::vector<Genotype<T>> genotypes);
     std::vector<Genotype<T>>& getGenotypes();
