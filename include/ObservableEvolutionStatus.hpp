@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Genotype.hpp"
+#include "Population.hpp"
+
 template <typename T>
 class ObservableEvolutionStatus {
 public:
