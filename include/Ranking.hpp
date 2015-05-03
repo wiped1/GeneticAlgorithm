@@ -30,11 +30,9 @@ public:
 template <typename T>
 typename Ranking<T>::CollectionType Ranking<T>::rank(Population<T> &pop, const Evaluator<T> &evaluator) {
     typename Ranking<T>::CollectionType result;
-
-    for (Genotype<T>& genotype : pop.getGenotypes()) {
+    std::for_each(pop.begin(), pop.end(), [&](Genotype<T>& genotype) {
         double fitness = evaluator.evaluate(genotype);
         result.emplace(&genotype, fitness);
-    }
-
+    });
     return result;
 }

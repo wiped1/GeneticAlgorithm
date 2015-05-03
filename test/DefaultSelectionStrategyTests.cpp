@@ -39,12 +39,13 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size has shrunken in half") {
-                REQUIRE(pop.getGenotypes().size() == 2);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 2);
             }
 
             THEN("Genotypes that are left have highest scores") {
-                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 4);
-                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 3);
+                auto it = pop.begin();
+                REQUIRE((*pop.begin()).getGenes().at(0) == 4);
+                REQUIRE((*(pop.begin() + 1)).getGenes().at(0) == 3);
             }
         }
     }
@@ -61,7 +62,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size is exactly 50") {
-                REQUIRE(pop.getGenotypes().size() == 50);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
             }
         }
     }
@@ -78,7 +79,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size is exactly 50") {
-                REQUIRE(pop.getGenotypes().size() == 50);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
             }
         }
     }
