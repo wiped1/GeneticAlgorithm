@@ -20,7 +20,7 @@ public:
     virtual unsigned int getNumberOfGenerations();
     virtual double getHighestFitness();
     virtual double getFitnessDelta();
-    virtual const std::vector<T>& getGenesWithBestFitness();
+    virtual const Genotype<T>& getGenotypeWithBestFitness();
     virtual const Population<T>& getPopulation();
     virtual long getPopulationSize() const;
 
@@ -52,8 +52,8 @@ double EvolutionStatus<T>::getFitnessDelta() {
 }
 
 template <typename T>
-const std::vector<T>& EvolutionStatus<T>::getGenesWithBestFitness() {
-    return const_cast<Genotype<T>*>(bestGenotype)->getGenes();
+const Genotype<T>& EvolutionStatus<T>::getGenotypeWithBestFitness() {
+    return *bestGenotype;
 }
 
 template <typename T>

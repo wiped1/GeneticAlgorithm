@@ -13,9 +13,9 @@ class IntGenotypeEvaluator : public Evaluator<int> {
 public:
     virtual double evaluate(Genotype<int> &genotype) const {
         double score = 0;
-        for (unsigned int i = 0; i < genotype.getGenes().size(); i++) {
-            score += genotype.getGenes().at(i);
-        }
+        std::for_each(genotype.begin(), genotype.end(), [&](int value) {
+            score += value;
+        });
         return score;
     }
 };
@@ -44,8 +44,8 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
             THEN("Genotypes that are left have highest scores") {
                 auto it = pop.begin();
-                REQUIRE((*pop.begin()).getGenes().at(0) == 4);
-                REQUIRE((*(pop.begin() + 1)).getGenes().at(0) == 3);
+                REQUIRE(*((*pop.begin()).begin()) == 4);
+                REQUIRE(*((*(pop.begin() + 1)).begin()) == 3);
             }
         }
     }
