@@ -13,13 +13,11 @@ public:
     struct FitnessGenotypeComparator {
         bool operator() (const std::pair<Genotype<T>*, double>& lhs,
                 const std::pair<Genotype<T>*, double>& rhs) {
-            // consider equal values as greater, as it poses no difference in
-            // GA execution, but allows SelectionStrategy to properly delete elements
-            return lhs.second >= rhs.second;
+            return lhs.second > rhs.second;
         }
     };
 
-    typedef std::set<std::pair<Genotype<T>*, double>, FitnessGenotypeComparator> CollectionType;
+    using CollectionType = std::multiset<std::pair<Genotype<T>*, double>, FitnessGenotypeComparator>;
 
     /*
      * Returns std::set containing reference to Genotype<T> and it's fitness after evaluation
