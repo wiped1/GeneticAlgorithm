@@ -3,6 +3,8 @@
 #include "Genotype.hpp"
 #include "Population.hpp"
 
+namespace gall {
+
 template <typename T>
 class ObservableEvolutionStatus {
 public:
@@ -15,3 +17,5 @@ public:
     virtual const Population<T>& getPopulation() = 0;
     virtual long getPopulationSize() const = 0;
 };
+
+}

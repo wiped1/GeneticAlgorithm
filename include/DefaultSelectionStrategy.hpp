@@ -4,6 +4,8 @@
 #include "Ranking.hpp"
 #include "SelectionStrategy.hpp"
 
+namespace gall {
+
 template <typename T>
 class DefaultSelectionStrategy : public SelectionStrategy<T> {
 public:
@@ -26,4 +28,6 @@ void DefaultSelectionStrategy<T>::eliminate(Population<T> &pop, typename Ranking
         newPopulation.emplace_back(std::move(*pair.first));
     });
     pop = Population<T>(newPopulation);
+}
+
 }

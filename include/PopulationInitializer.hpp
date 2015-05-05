@@ -4,6 +4,8 @@
 #include "Genotype.hpp"
 #include "GenotypeInitializer.hpp"
 
+namespace gall {
+
 template <typename T>
 class PopulationInitializer {
 private:
@@ -25,4 +27,6 @@ void PopulationInitializer<T>::initialize(std::vector<Genotype<T>> &genotypes) c
     for (unsigned int i = 0; i < _size; i++) {
         genotypes.emplace_back(_initializer);
     }
+}
+
 }

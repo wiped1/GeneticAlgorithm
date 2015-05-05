@@ -7,6 +7,8 @@
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
 
+using namespace gall;
+
 // anonymous namespace to prevent linker errors
 namespace {
 class IntGenotypeEvaluator : public Evaluator<int> {

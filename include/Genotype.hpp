@@ -3,6 +3,8 @@
 #include <vector>
 #include "GenotypeInitializer.hpp"
 
+namespace gall {
+
 template <typename T>
 class Genotype {
 private:
@@ -52,4 +54,6 @@ typename Genotype<T>::CollectionType::iterator Genotype<T>::end() {
 template <typename T>
 typename Genotype<T>::CollectionType::const_iterator Genotype<T>::cend() {
     return _genes.cend();
+}
+
 }

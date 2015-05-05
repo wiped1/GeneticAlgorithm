@@ -4,6 +4,8 @@
 #include "Genotype.hpp"
 #include "PopulationInitializer.hpp"
 
+namespace gall {
+
 template <typename T>
 class Population {
 private:
@@ -48,4 +50,6 @@ typename Population<T>::CollectionType::iterator Population<T>::end() {
 template <typename T>
 typename Population<T>::CollectionType::const_iterator Population<T>::cend() const {
     return _genotypes.cend();
+}
+
 }

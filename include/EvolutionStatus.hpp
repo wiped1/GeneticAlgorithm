@@ -5,6 +5,8 @@
 #include "Population.hpp"
 #include "ObservableEvolutionStatus.hpp"
 
+namespace gall {
+
 template <typename T>
 class EvolutionStatus : public ObservableEvolutionStatus<T> {
 private:
@@ -80,4 +82,6 @@ void EvolutionStatus<T>::setGenotypeWithBestFitness(const Genotype<T> &genotype)
 template <typename T>
 long EvolutionStatus<T>::getPopulationSize() const {
     return std::distance(population->cbegin(), population->cend());
+}
+
 }

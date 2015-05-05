@@ -5,6 +5,8 @@
 #include "Population.hpp"
 #include "Evaluator.hpp"
 
+namespace gall {
+
 template <typename T>
 class Ranking {
 private:
@@ -33,4 +35,6 @@ typename Ranking<T>::CollectionType Ranking<T>::rank(Population<T> &pop, const E
         result.emplace(&genotype, fitness);
     });
     return result;
+}
+
 }

@@ -5,6 +5,8 @@
 #include "Population.hpp"
 #include "EvolutionStatus.hpp"
 
+using namespace gall;
+
 SCENARIO("EvolutionStatus is used in safe representation of current evolution data") {
     GIVEN("Initialized EvolutionStatus") {
         std::vector<int> vec = {0};
