@@ -7,15 +7,17 @@
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
 
+using namespace gall;
+
 // anonymous namespace to prevent linker errors
 namespace {
 class IntGenotypeEvaluator : public Evaluator<int> {
 public:
     virtual double evaluate(Genotype<int> &genotype) const {
         double score = 0;
-        for (unsigned int i = 0; i < genotype.getGenes().size(); i++) {
-            score += genotype.getGenes().at(i);
-        }
+        std::for_each(genotype.begin(), genotype.end(), [&](int value) {
+            score += value;
+        });
         return score;
     }
 };
@@ -39,12 +41,13 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size has shrunken in half") {
-                REQUIRE(pop.getGenotypes().size() == 2);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 2);
             }
 
             THEN("Genotypes that are left have highest scores") {
-                REQUIRE(pop.getGenotypes().at(0).getGenes().at(0) == 4);
-                REQUIRE(pop.getGenotypes().at(1).getGenes().at(0) == 3);
+                auto it = pop.begin();
+                REQUIRE(*((*pop.begin()).begin()) == 4);
+                REQUIRE(*((*(pop.begin() + 1)).begin()) == 3);
             }
         }
     }
@@ -61,7 +64,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size is exactly 50") {
-                REQUIRE(pop.getGenotypes().size() == 50);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
             }
         }
     }
@@ -78,7 +81,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
             selectionStrategy.eliminate(pop, ranking.rank(pop, evaluator));
 
             THEN("Population size is exactly 50") {
-                REQUIRE(pop.getGenotypes().size() == 50);
+                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
             }
         }
     }

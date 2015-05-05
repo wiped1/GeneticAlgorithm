@@ -16,6 +16,8 @@
 #include "EvolutionStatus.hpp"
 #include "ObservableEvolutionStatus.hpp"
 
+namespace gall {
+
 template <typename T>
 class EvolvingProcess :
         private PolymorphicDependency<GenotypeInitializer<T>>,
@@ -79,6 +81,8 @@ void updateEvolutionStatus(EvolutionStatus<T>& status, const typename Ranking<T>
 
 template <typename T>
 void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStatus<T>& status)>& terminationCondition) {
+    /* TODO ta funkcja jest strasznie nieodporna na zmiany, łatwo zapomnieć jeśli
+     * doda się jakiś dependency i będzie kiszka, jak to zrobić żeby się nie narobić? */
     // check if all dependencies are properly initialized
     if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
           SelectionStrategyDependency::get() && CrossoverStrategyDependency::get() &&
@@ -100,3 +104,4 @@ void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStat
     } while (!terminationCondition(status));
 }
 
+}

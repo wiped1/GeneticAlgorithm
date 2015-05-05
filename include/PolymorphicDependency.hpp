@@ -2,6 +2,8 @@
 
 #include <memory>
 
+namespace gall {
+
 template <typename T>
 class PolymorphicDependency {
 private:
@@ -37,4 +39,6 @@ void PolymorphicDependency<T>::set(std::unique_ptr<T> dependency) {
 template <typename T>
 T* PolymorphicDependency<T>::get() {
     return _dependency.get();
+}
+
 }

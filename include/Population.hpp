@@ -1,18 +1,25 @@
 #pragma once
 
+#include <functional>
 #include "Genotype.hpp"
 #include "PopulationInitializer.hpp"
+
+namespace gall {
 
 template <typename T>
 class Population {
 private:
-    std::vector<Genotype<T>> _genotypes;
+    using CollectionType = std::vector<Genotype<T>>;
+    CollectionType _genotypes;
 
 public:
     Population() = delete;
     Population(const PopulationInitializer<T>& populationInitializer);
-    Population(std::vector<Genotype<T>> genotypes);
-    std::vector<Genotype<T>>& getGenotypes();
+    Population(CollectionType genotypes);
+    typename CollectionType::iterator begin();
+    typename CollectionType::const_iterator cbegin() const;
+    typename CollectionType::iterator end();
+    typename CollectionType::const_iterator cend() const;
 };
 
 template <typename T>
@@ -21,12 +28,28 @@ Population<T>::Population(const PopulationInitializer<T>& populationInitializer)
 }
 
 template <typename T>
-Population<T>::Population(std::vector<Genotype<T>> genotypes) : _genotypes(std::move(genotypes)) {
+Population<T>::Population(CollectionType genotypes) : _genotypes(std::move(genotypes)) {
     // do nothing
 }
 
 template <typename T>
-std::vector<Genotype<T>>& Population<T>::getGenotypes() {
-    return _genotypes;
+typename Population<T>::CollectionType::iterator Population<T>::begin() {
+    return _genotypes.begin();
 }
 
+template <typename T>
+typename Population<T>::CollectionType::const_iterator Population<T>::cbegin() const {
+    return _genotypes.cbegin();
+}
+
+template <typename T>
+typename Population<T>::CollectionType::iterator Population<T>::end() {
+    return _genotypes.end();
+}
+
+template <typename T>
+typename Population<T>::CollectionType::const_iterator Population<T>::cend() const {
+    return _genotypes.cend();
+}
+
+}

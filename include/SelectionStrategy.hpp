@@ -6,6 +6,8 @@
 #include "Evaluator.hpp"
 #include "Ranking.hpp"
 
+namespace gall {
+
 template <typename T>
 class SelectionStrategy {
 public:
@@ -13,3 +15,4 @@ public:
     virtual void eliminate(Population<T> &population, typename Ranking<T>::CollectionType ranking) = 0;
 };
 
+}

@@ -8,6 +8,8 @@
 #include "MutationStrategy.hpp"
 #include "ObservableEvolutionStatus.hpp"
 
+using namespace gall;
+
 namespace {
 class MockGenotypeInitializer : public GenotypeInitializer<int> {
 public:

@@ -2,6 +2,8 @@
 
 #include <vector>
 
+namespace gall {
+
 template <typename T>
 class GenotypeInitializer {
 public:
@@ -9,3 +11,4 @@ public:
     virtual void initialize(std::vector<T> &genes) const = 0;
 };
 
+}
