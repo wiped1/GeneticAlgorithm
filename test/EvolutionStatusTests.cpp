@@ -1,6 +1,5 @@
 #include "Catch/catch.hpp"
 
-#include <vector>
 #include "Genotype.hpp"
 #include "Population.hpp"
 #include "EvolutionStatus.hpp"
@@ -11,7 +10,8 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
     GIVEN("Initialized EvolutionStatus") {
         std::vector<int> vec = {0};
         Genotype<int> genotype(vec);
-        std::vector<Genotype<int>> genotypes = {genotype};
+        Population<int>::CollectionType genotypes;
+        genotypes.emplace(Population<int>::GenotypeType(genotype, 0));
         Population<int> pop(genotypes);
         EvolutionStatus<int> status(pop);
 

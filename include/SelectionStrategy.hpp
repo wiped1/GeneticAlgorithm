@@ -12,7 +12,7 @@ template <typename T>
 class SelectionStrategy {
 public:
     virtual ~SelectionStrategy() = default;
-    virtual void eliminate(Population<T> &population, typename Ranking<T>::CollectionType ranking) = 0;
+    virtual void eliminate(Population<T> &population) = 0;
 };
 
 }

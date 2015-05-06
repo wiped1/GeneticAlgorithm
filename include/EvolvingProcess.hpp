@@ -71,10 +71,10 @@ EvolvingProcess<T>& EvolvingProcess<T>::use(Dependency dependency) {
 }
 
 template <typename T>
-void updateEvolutionStatus(EvolutionStatus<T>& status, const typename Ranking<T>::CollectionType& rankedGenotypes) {
-    // set is sorted high to low, first element is bound to be the one with highest fitness
-    auto it = rankedGenotypes.cbegin();
-    status.setGenotypeWithBestFitness(*(*it).first);
+void updateEvolutionStatus(EvolutionStatus<T>& status, Population<T> population) {
+    // population genotypes are sorted high to low, first element is bound to be the one with highest fitness
+    auto it = population.cbegin();
+    status.setGenotypeWithBestFitness((*it).first);
     status.updateFitness((*it).second);
     status.incrementNumberOfGenerations();
 }
@@ -95,12 +95,10 @@ void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStat
     Population<T> pop(populationInitializer);
     EvolutionStatus<T> status(pop);
     do {
-        Ranking<T> ranking;
-        typename Ranking<T>::CollectionType rankedGenotypes = ranking.rank(pop, *EvaluatorDependency::get());
-        SelectionStrategyDependency::get()->eliminate(pop, rankedGenotypes);
+        SelectionStrategyDependency::get()->eliminate(pop);
         CrossoverStrategyDependency::get()->cross(pop);
         MutationStrategyDependency::get()->mutate(pop);
-        updateEvolutionStatus(status, rankedGenotypes);
+        updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }
 

@@ -29,7 +29,7 @@ public:
 
 class MockSelectionStrategy : public SelectionStrategy<int> {
 public:
-    virtual void eliminate(Population<int> &population, Ranking<int>::CollectionType ranking) {
+    virtual void eliminate(Population<int> &population) {
         // do nothing
     }
 };

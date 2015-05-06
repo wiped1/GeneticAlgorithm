@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include "Genotype.hpp"
 #include "Population.hpp"

@@ -7,15 +7,38 @@
 namespace gall {
 
 template <typename T>
+class PopulationInitializer;
+
+template <typename T>
+struct GenotypeFitnessPairComparator {
+    bool operator()(const std::pair<Genotype<T>, double>& lhs,
+            const std::pair<Genotype<T>, double>& rhs) {
+        /* TODO zamienić negację na komparator który będzie negował komparację zadanego komparatora */
+//        return !(lhs.second < rhs.second) ||
+//                (lhs.second == rhs.second && lhs.first < rhs.first);
+        return lhs.second > rhs.second;
+    }
+};
+
+template <typename T>
 class Population {
 private:
-    using CollectionType = std::vector<Genotype<T>>;
-    CollectionType _genotypes;
+
+    /* private alias in order to declare `genotypes` member */
+    using _GenotypeType = std::pair<Genotype<T>, double>;
+    using _CollectionType = std::set<_GenotypeType, GenotypeFitnessPairComparator<T>>;
+    _CollectionType genotypes;
 
 public:
+    /* public alias for other classes to use */
+    using GenotypeType = _GenotypeType;
+    using CollectionType = _CollectionType;
     Population() = delete;
     Population(const PopulationInitializer<T>& populationInitializer);
     Population(CollectionType genotypes);
+    void erase(typename Population<T>::CollectionType::iterator pos);
+    void erase(typename Population<T>::CollectionType::iterator begin,
+               typename Population<T>::CollectionType::iterator end);
     typename CollectionType::iterator begin();
     typename CollectionType::const_iterator cbegin() const;
     typename CollectionType::iterator end();
@@ -23,33 +46,44 @@ public:
 };
 
 template <typename T>
-Population<T>::Population(const PopulationInitializer<T>& populationInitializer) : _genotypes() {
-    populationInitializer.initialize(_genotypes);
+Population<T>::Population(const PopulationInitializer<T>& populationInitializer) : genotypes() {
+    populationInitializer.initialize(genotypes);
 }
 
 template <typename T>
-Population<T>::Population(CollectionType genotypes) : _genotypes(std::move(genotypes)) {
+Population<T>::Population(CollectionType genotypes) : genotypes(std::move(genotypes)) {
     // do nothing
 }
 
 template <typename T>
 typename Population<T>::CollectionType::iterator Population<T>::begin() {
-    return _genotypes.begin();
+    return genotypes.begin();
 }
 
 template <typename T>
 typename Population<T>::CollectionType::const_iterator Population<T>::cbegin() const {
-    return _genotypes.cbegin();
+    return genotypes.cbegin();
 }
 
 template <typename T>
 typename Population<T>::CollectionType::iterator Population<T>::end() {
-    return _genotypes.end();
+    return genotypes.end();
 }
 
 template <typename T>
 typename Population<T>::CollectionType::const_iterator Population<T>::cend() const {
-    return _genotypes.cend();
+    return genotypes.cend();
+}
+
+template <typename T>
+void Population<T>::erase(typename Population<T>::CollectionType::iterator pos) {
+    genotypes.erase(pos);
+}
+
+template <typename T>
+void Population<T>::erase(typename Population<T>::CollectionType::iterator begin,
+                          typename Population<T>::CollectionType::iterator end) {
+    genotypes.erase(begin, end);
 }
 
 }
