@@ -10,10 +10,10 @@ SCENARIO("EvolutionStatus is used in safe representation of current evolution da
     GIVEN("Initialized EvolutionStatus") {
         std::vector<int> vec = {0};
         Genotype<int> genotype(vec);
-        Population<int>::CollectionType genotypes;
-        genotypes.emplace(Population<int>::GenotypeType(genotype, 0));
-        Population<int> pop(genotypes);
-        EvolutionStatus<int> status(pop);
+        Population<decltype(genotype)>::CollectionType genotypes;
+        genotypes.emplace(Population<decltype(genotype)>::ValueType(genotype, 0));
+        Population<decltype(genotype)> pop(genotypes);
+        EvolutionStatus<decltype(genotype)> status(pop);
 
         WHEN("Number of generations is incremented") {
             // precheck

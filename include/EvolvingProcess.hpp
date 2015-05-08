@@ -18,60 +18,60 @@
 
 namespace gall {
 
-template <typename T>
+template <typename Genotype>
 class EvolvingProcess :
-        private PolymorphicDependency<GenotypeInitializer<T>>,
-        private PolymorphicDependency<Evaluator<T>>,
-        private PolymorphicDependency<SelectionStrategy<T>>,
-        private PolymorphicDependency<CrossoverStrategy<T>>,
-        private PolymorphicDependency<MutationStrategy<T>> {
+        private PolymorphicDependency<GenotypeInitializer<Genotype>>,
+        private PolymorphicDependency<Evaluator<Genotype>>,
+        private PolymorphicDependency<SelectionStrategy<Genotype>>,
+        private PolymorphicDependency<CrossoverStrategy<Genotype>>,
+        private PolymorphicDependency<MutationStrategy<Genotype>> {
 private:
     unsigned int _populationSize;
 
     // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
-    using PolymorphicDependency<GenotypeInitializer<T>>::set;
-    using PolymorphicDependency<Evaluator<T>>::set;
-    using PolymorphicDependency<SelectionStrategy<T>>::set;
-    using PolymorphicDependency<CrossoverStrategy<T>>::set;
-    using PolymorphicDependency<MutationStrategy<T>>::set;
+    using PolymorphicDependency<GenotypeInitializer<Genotype>>::set;
+    using PolymorphicDependency<Evaluator<Genotype>>::set;
+    using PolymorphicDependency<SelectionStrategy<Genotype>>::set;
+    using PolymorphicDependency<CrossoverStrategy<Genotype>>::set;
+    using PolymorphicDependency<MutationStrategy<Genotype>>::set;
     // aliases for easier base classes access
-    using GenotypeInitializerDependency = PolymorphicDependency<GenotypeInitializer<T>>;
-    using EvaluatorDependency           = PolymorphicDependency<Evaluator<T>>;
-    using SelectionStrategyDependency   = PolymorphicDependency<SelectionStrategy<T>>;
-    using CrossoverStrategyDependency   = PolymorphicDependency<CrossoverStrategy<T>>;
-    using MutationStrategyDependency    = PolymorphicDependency<MutationStrategy<T>>;
+    using GenotypeInitializerDependency = PolymorphicDependency<GenotypeInitializer<Genotype>>;
+    using EvaluatorDependency           = PolymorphicDependency<Evaluator<Genotype>>;
+    using SelectionStrategyDependency   = PolymorphicDependency<SelectionStrategy<Genotype>>;
+    using CrossoverStrategyDependency   = PolymorphicDependency<CrossoverStrategy<Genotype>>;
+    using MutationStrategyDependency    = PolymorphicDependency<MutationStrategy<Genotype>>;
 
 public:
     EvolvingProcess(unsigned int populationSize);
     template <typename Dependency>
-    EvolvingProcess<T>& operator<<(Dependency dependency);
+    EvolvingProcess<Genotype>& operator<<(Dependency dependency);
     template <typename Dependency>
-    EvolvingProcess<T>& use(Dependency dependency);
-    void evolve(const std::function<bool(ObservableEvolutionStatus<T>& status)>& terminationCondition);
+    EvolvingProcess<Genotype>& use(Dependency dependency);
+    void evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition);
 };
 
-template <typename T>
-EvolvingProcess<T>::EvolvingProcess(unsigned int populationSize) :
+template <typename Genotype>
+EvolvingProcess<Genotype>::EvolvingProcess(unsigned int populationSize) :
         _populationSize(populationSize) {
-    SelectionStrategyDependency::set(new DefaultSelectionStrategy<T>());
+    SelectionStrategyDependency::set(new DefaultSelectionStrategy<Genotype>());
 }
 
-template <typename T>
+template <typename Genotype>
 template <typename Dependency>
-EvolvingProcess<T>& EvolvingProcess<T>::operator<<(Dependency dependency) {
+EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::operator<<(Dependency dependency) {
     return use(dependency);
 }
 
-template <typename T>
+template <typename Genotype>
 template <typename Dependency>
-EvolvingProcess<T>& EvolvingProcess<T>::use(Dependency dependency) {
+EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::use(Dependency dependency) {
     set(dependency);
     return *this;
 }
 
-template <typename T>
-void updateEvolutionStatus(EvolutionStatus<T>& status, Population<T> population) {
+template <typename Genotype>
+void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotype> population) {
     // population genotypes are sorted high to low, first element is bound to be the one with highest fitness
     auto it = population.cbegin();
     status.setGenotypeWithBestFitness((*it).first);
@@ -79,8 +79,8 @@ void updateEvolutionStatus(EvolutionStatus<T>& status, Population<T> population)
     status.incrementNumberOfGenerations();
 }
 
-template <typename T>
-void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStatus<T>& status)>& terminationCondition) {
+template <typename Genotype>
+void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
     /* TODO ta funkcja jest strasznie nieodporna na zmiany, łatwo zapomnieć jeśli
      * doda się jakiś dependency i będzie kiszka, jak to zrobić żeby się nie narobić? */
     // check if all dependencies are properly initialized
@@ -91,9 +91,9 @@ void EvolvingProcess<T>::evolve(const std::function<bool(ObservableEvolutionStat
                                      "Check if all dependencies were injected.");
     }
 
-    PopulationInitializer<T> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
-    Population<T> pop(populationInitializer);
-    EvolutionStatus<T> status(pop);
+    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
+    Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
+    EvolutionStatus<Genotype> status(pop);
     do {
         SelectionStrategyDependency::get()->eliminate(pop);
         CrossoverStrategyDependency::get()->cross(pop);

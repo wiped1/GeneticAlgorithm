@@ -4,11 +4,11 @@
 
 namespace gall {
 
-template <typename T>
+template <typename Genotype>
 class GenotypeInitializer {
 public:
     virtual ~GenotypeInitializer() = default;
-    virtual void initialize(std::vector<T> &genes) const = 0;
+    virtual void initialize(typename Genotype::Collection &genes) const = 0;
 };
 
 }

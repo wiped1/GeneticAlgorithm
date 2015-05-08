@@ -1,59 +1,77 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 #include "GenotypeInitializer.hpp"
 
 namespace gall {
 
-template <typename T>
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType = std::vector>
 class Genotype {
 private:
-    using CollectionType = std::vector<T>;
-    CollectionType _genes;
+    CollectionType<T> genes;
 
 public:
-    Genotype(const GenotypeInitializer<T>& genotypeInitializer);
-    Genotype(CollectionType genes);
-    bool operator==(const Genotype<T>& other);
-    typename CollectionType::iterator begin();
-    typename CollectionType::const_iterator cbegin();
-    typename CollectionType::iterator end();
-    typename CollectionType::const_iterator cend();
+    using Collection = CollectionType<T>;
+    Genotype(const GenotypeInitializer<Genotype<T, CollectionType>>& genotypeInitializer);
+    Genotype(CollectionType<T> genes);
+    bool operator==(const Genotype<T, CollectionType>& other);
+    bool operator<(const Genotype<T, CollectionType>& other) const;
+    typename CollectionType<T>::iterator begin();
+    typename CollectionType<T>::const_iterator cbegin() const;
+    typename CollectionType<T>::iterator end();
+    typename CollectionType<T>::const_iterator cend() const;
 };
 
-template <typename T>
-Genotype<T>::Genotype(const GenotypeInitializer<T>& genotypeInitializer) : _genes() {
-    genotypeInitializer.initialize(_genes);
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+Genotype<T, CollectionType>::Genotype(const GenotypeInitializer<Genotype<T, CollectionType>>& genotypeInitializer) :
+        genes() {
+    genotypeInitializer.initialize(genes);
 }
 
-template <typename T>
-Genotype<T>::Genotype(std::vector<T> genes) : _genes(std::move(genes)) {
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+Genotype<T, CollectionType>::Genotype(CollectionType<T> genes) : genes(std::move(genes)) {
     // do nothing
 }
 
-template <typename T>
-bool Genotype<T>::operator==(const Genotype<T>& other) {
-    return _genes == other._genes;
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+bool Genotype<T, CollectionType>::operator==(const Genotype<T, CollectionType>& other) {
+    return genes == other.genes;
 }
 
-template <typename T>
-typename Genotype<T>::CollectionType::iterator Genotype<T>::begin() {
-    return _genes.begin();
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+bool Genotype<T, CollectionType>::operator<(const Genotype<T, CollectionType>& other) const {
+    return std::lexicographical_compare(genes.cbegin(), genes.cend(),
+                                        other.cbegin(), other.cend());
 }
 
-template <typename T>
-typename Genotype<T>::CollectionType::const_iterator Genotype<T>::cbegin() {
-    return _genes.cbegin();
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+typename CollectionType<T>::iterator Genotype<T, CollectionType>::begin() {
+    return genes.begin();
 }
 
-template <typename T>
-typename Genotype<T>::CollectionType::iterator Genotype<T>::end() {
-    return _genes.end();
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+typename CollectionType<T>::const_iterator Genotype<T, CollectionType>::cbegin() const {
+    return genes.cbegin();
 }
 
-template <typename T>
-typename Genotype<T>::CollectionType::const_iterator Genotype<T>::cend() {
-    return _genes.cend();
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+typename CollectionType<T>::iterator Genotype<T, CollectionType>::end() {
+    return genes.end();
+}
+
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+typename CollectionType<T>::const_iterator Genotype<T, CollectionType>::cend() const {
+    return genes.cend();
 }
 
 }

@@ -11,7 +11,7 @@
 using namespace gall;
 
 namespace {
-class MockGenotypeInitializer : public GenotypeInitializer<int> {
+class MockGenotypeInitializer : public GenotypeInitializer<Genotype<int>> {
 public:
     virtual void initialize(std::vector<int> &genes) const {
         for (int i = 0; i < 10; i++) {
@@ -20,30 +20,30 @@ public:
     }
 };
 
-class MockEvaluator : public Evaluator<int> {
+class MockEvaluator : public Evaluator<Genotype<int>> {
 public:
     virtual double evaluate(Genotype<int> &genotype) const {
         return 0;
     }
 };
 
-class MockSelectionStrategy : public SelectionStrategy<int> {
+class MockSelectionStrategy : public SelectionStrategy<Genotype<int>> {
 public:
-    virtual void eliminate(Population<int> &population) {
+    virtual void eliminate(Population<Genotype<int>> &population) {
         // do nothing
     }
 };
 
-class MockCrossoverStrategy : public CrossoverStrategy<int> {
+class MockCrossoverStrategy : public CrossoverStrategy<Genotype<int>> {
 public:
-    virtual void cross(Population<int> &population) const {
+    virtual void cross(Population<Genotype<int>> &population) const {
         // do nothing
     }
 };
 
-class MockMutationStrategy : public MutationStrategy<int> {
+class MockMutationStrategy : public MutationStrategy<Genotype<int>> {
 public:
-    virtual void mutate(Population<int> &population) const {
+    virtual void mutate(Population<Genotype<int>> &population) const {
         // do nothing
     }
 };
@@ -51,7 +51,7 @@ public:
 
 SCENARIO("Evolving process uses objects defined by library users") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<int> process(10);
+        EvolvingProcess<Genotype<int>> process(10);
 
         WHEN("Dependencies are injected") {
             process << new MockGenotypeInitializer << new MockEvaluator <<
@@ -59,7 +59,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
                     new MockMutationStrategy;
             // great test...
             THEN("Nothing happens.") {
-                process.evolve([](ObservableEvolutionStatus<int>& status) {
+                process.evolve([](ObservableEvolutionStatus<Genotype<int>>& status) {
                     return true;
                 });
             }
@@ -67,7 +67,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
         WHEN("All dependencies are missing") {
             THEN("Exception is thrown") {
-                REQUIRE_THROWS(process.evolve([](ObservableEvolutionStatus<int>& status) {
+                REQUIRE_THROWS(process.evolve([](ObservableEvolutionStatus<Genotype<int>>& status) {
                     return true;
                 }));
             }
@@ -77,14 +77,14 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
 SCENARIO("Evolving process has user defined termination condition") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<int> process(10);
+        EvolvingProcess<Genotype<int>> process(10);
 
         process << new MockGenotypeInitializer() << new MockEvaluator() <<
                 new MockCrossoverStrategy() << new MockMutationStrategy() <<
                 new MockSelectionStrategy();
         WHEN("Evolving process is run") {
             int generations = 0;
-            process.evolve([&](ObservableEvolutionStatus<int>& status) -> bool {
+            process.evolve([&](ObservableEvolutionStatus<Genotype<int>>& status) -> bool {
                 generations++;
                 return status.getNumberOfGenerations() >= 10;
             });

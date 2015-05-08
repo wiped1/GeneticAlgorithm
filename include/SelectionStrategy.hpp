@@ -8,11 +8,11 @@
 
 namespace gall {
 
-template <typename T>
+template <typename Genotype>
 class SelectionStrategy {
 public:
     virtual ~SelectionStrategy() = default;
-    virtual void eliminate(Population<T> &population) = 0;
+    virtual void eliminate(Population<Genotype> &population) = 0;
 };
 
 }

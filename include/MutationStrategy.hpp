@@ -4,11 +4,11 @@
 
 namespace gall {
 
-template <typename T>
+template <typename Genotype>
 class MutationStrategy {
 public:
     virtual ~MutationStrategy() = default;
-    virtual void mutate(Population<T>& population) const = 0;
+    virtual void mutate(Population<Genotype>& population) const = 0;
 };
 
 }

@@ -1,35 +1,40 @@
 #pragma once
 
 #include <vector>
-#include "Genotype.hpp"
 #include "GenotypeInitializer.hpp"
 #include "Population.hpp"
+#include "Evaluator.hpp"
 
 namespace gall {
 
-template <typename T>
+template <typename Genotype>
 class Population;
 
-template <typename T>
+template <typename Genotype>
 class PopulationInitializer {
 private:
     unsigned int _size;
-    const GenotypeInitializer<T>& initializer;
+    const GenotypeInitializer<Genotype>& initializer;
 public:
-    PopulationInitializer(const GenotypeInitializer<T>& initializer, unsigned int size);
-    void initialize(typename Population<T>::CollectionType& genotypes) const;
+    PopulationInitializer(const GenotypeInitializer<Genotype>& initializer, unsigned int size);
+    void initialize(typename Population<Genotype>::CollectionType& genotypes,
+                    const Evaluator<Genotype>& evaluator) const;
 };
 
-template <typename T>
-PopulationInitializer<T>::PopulationInitializer(const GenotypeInitializer<T>& initializer,
+template <typename Genotype>
+PopulationInitializer<Genotype>::PopulationInitializer(const GenotypeInitializer<Genotype>& initializer,
         unsigned int size) : initializer(initializer), _size(size) {
     // do nothing
 }
 
-template <typename T>
-void PopulationInitializer<T>::initialize(typename Population<T>::CollectionType& genotypes) const {
+template <typename Genotype>
+void PopulationInitializer<Genotype>::initialize(typename Population<Genotype>::CollectionType& genotypes,
+                                          const Evaluator<Genotype>& evaluator) const {
     for (unsigned int i = 0; i < _size; i++) {
-        genotypes.emplace(initializer, 0);
+        Genotype genotype{initializer};
+        double fitness = evaluator.evaluate(genotype);
+        typename Population<Genotype>::ValueType value{genotype, fitness};
+        genotypes.insert(value);
     }
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include "Population.hpp"
 #include "Ranking.hpp"
 #include "SelectionStrategy.hpp"
@@ -19,9 +20,9 @@ public:
 template <typename T>
 void DefaultSelectionStrategy<T>::eliminate(Population<T> &pop) {
     std::vector<Genotype<T>> newPopulation;
-    long range = std::distance(pop.cbegin(), pop.cend()) / 2;
-    auto begin = std::next(pop.begin(), range);
-    auto end = pop.end();
+    long range = static_cast<long>(std::ceil(std::distance(pop.cbegin(), pop.cend()) / 2.0)); /* 2.0 as floating point to prevent cast */
+    auto begin = pop.begin();
+    auto end = std::next(begin, range);
     pop.erase(begin, end);
 }
 
