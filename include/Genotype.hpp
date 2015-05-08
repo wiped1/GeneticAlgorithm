@@ -18,6 +18,8 @@ public:
     Genotype(CollectionType<T> genes);
     bool operator==(const Genotype<T, CollectionType>& other);
     bool operator<(const Genotype<T, CollectionType>& other) const;
+    void forEach(const std::function<void(T&)>&);
+    void reverseForEach(const std::function<void(T&)>&);
     typename CollectionType<T>::iterator begin();
     typename CollectionType<T>::const_iterator cbegin() const;
     typename CollectionType<T>::iterator end();
@@ -41,6 +43,22 @@ template <typename T,
 template <typename, typename = std::allocator<T>> class CollectionType>
 bool Genotype<T, CollectionType>::operator==(const Genotype<T, CollectionType>& other) {
     return genes == other.genes;
+}
+
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+void Genotype<T, CollectionType>::forEach(const std::function<void(T&)>& callback) {
+    std::for_each(genes.begin(), genes.end(), [&](T& gene) {
+        callback(gene);
+    });
+}
+
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+void Genotype<T, CollectionType>::reverseForEach(const std::function<void(T&)>& callback) {
+    std::for_each(genes.end(), genes.begin(), [&](T& gene) {
+        callback(gene);
+    });
 }
 
 template <typename T,
