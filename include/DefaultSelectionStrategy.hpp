@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include "Population.hpp"
-#include "Ranking.hpp"
 #include "SelectionStrategy.hpp"
 
 namespace gall {

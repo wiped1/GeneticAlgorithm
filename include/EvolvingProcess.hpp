@@ -7,7 +7,6 @@
 #include "PolymorphicDependency.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
-#include "Ranking.hpp"
 #include "Evaluator.hpp"
 #include "SelectionStrategy.hpp"
 #include "DefaultSelectionStrategy.hpp"

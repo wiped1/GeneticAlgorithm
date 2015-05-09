@@ -4,7 +4,6 @@
 #include <iostream>
 #include "Population.hpp"
 #include "Evaluator.hpp"
-#include "Ranking.hpp"
 
 namespace gall {
 
