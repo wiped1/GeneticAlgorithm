@@ -18,6 +18,7 @@ public:
     Genotype(CollectionType<T> genes);
     bool operator==(const Genotype<T, CollectionType>& other);
     bool operator<(const Genotype<T, CollectionType>& other) const;
+    typename Collection::iterator insert(typename Collection::iterator pos, const T& value);
     void forEach(const std::function<void(T&)>&);
     void reverseForEach(const std::function<void(T&)>&);
     typename CollectionType<T>::iterator begin();
@@ -47,6 +48,21 @@ bool Genotype<T, CollectionType>::operator==(const Genotype<T, CollectionType>& 
 
 template <typename T,
 template <typename, typename = std::allocator<T>> class CollectionType>
+bool Genotype<T, CollectionType>::operator<(const Genotype<T, CollectionType>& other) const {
+    return std::lexicographical_compare(genes.cbegin(), genes.cend(),
+                                        other.cbegin(), other.cend());
+}
+
+
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
+typename Genotype<T, CollectionType>::Collection::iterator
+Genotype<T, CollectionType>::insert(typename Collection::iterator pos, const T& value) {
+    return genes.insert(pos, value);
+}
+
+template <typename T,
+template <typename, typename = std::allocator<T>> class CollectionType>
 void Genotype<T, CollectionType>::forEach(const std::function<void(T&)>& callback) {
     std::for_each(genes.begin(), genes.end(), [&](T& gene) {
         callback(gene);
@@ -59,13 +75,6 @@ void Genotype<T, CollectionType>::reverseForEach(const std::function<void(T&)>& 
     std::for_each(genes.end(), genes.begin(), [&](T& gene) {
         callback(gene);
     });
-}
-
-template <typename T,
-template <typename, typename = std::allocator<T>> class CollectionType>
-bool Genotype<T, CollectionType>::operator<(const Genotype<T, CollectionType>& other) const {
-    return std::lexicographical_compare(genes.cbegin(), genes.cend(),
-                                        other.cbegin(), other.cend());
 }
 
 template <typename T,
