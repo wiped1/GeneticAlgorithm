@@ -8,7 +8,7 @@ template <typename Genotype>
 class MutationOperator {
 public:
     virtual ~MutationOperator() = default;
-    virtual Genotype& mutate(Genotype genotype) const = 0;
+    virtual void mutate(Genotype &genotype) const = 0;
 };
 
 }

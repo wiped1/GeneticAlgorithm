@@ -3,6 +3,7 @@
 #include <iostream>
 #include <utility>
 #include <functional>
+#include <set>
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
 
