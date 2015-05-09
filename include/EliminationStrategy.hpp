@@ -8,9 +8,9 @@
 namespace gall {
 
 template <typename Genotype>
-class SelectionStrategy {
+class EliminationStrategy {
 public:
-    virtual ~SelectionStrategy() = default;
+    virtual ~EliminationStrategy() = default;
     virtual void eliminate(Population<Genotype> &population) = 0;
 };
 

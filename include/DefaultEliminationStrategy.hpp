@@ -2,12 +2,12 @@
 
 #include <cmath>
 #include "Population.hpp"
-#include "SelectionStrategy.hpp"
+#include "EliminationStrategy.hpp"
 
 namespace gall {
 
 template <typename T>
-class DefaultSelectionStrategy : public SelectionStrategy<T> {
+class DefaultEliminationStrategy : public EliminationStrategy<T> {
 public:
     /*
         Standard implementation of eliminate function eliminates lesser half
@@ -17,8 +17,7 @@ public:
 };
 
 template <typename T>
-void DefaultSelectionStrategy<T>::eliminate(Population<T> &pop) {
-    std::vector<Genotype<T>> newPopulation;
+void DefaultEliminationStrategy<T>::eliminate(Population<T> &pop) {
     long range = static_cast<long>(std::ceil(std::distance(pop.cbegin(), pop.cend()) / 2.0)); /* 2.0 as floating point to prevent cast */
     auto begin = pop.begin();
     auto end = std::next(begin, range);

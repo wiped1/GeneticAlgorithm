@@ -9,7 +9,7 @@ template <typename Genotype>
 class Evaluator {
 public:
     virtual ~Evaluator() = default;
-    virtual double evaluate(Genotype &genotype) const = 0;
+    virtual double evaluate(const Genotype &genotype) const = 0;
 };
 
 }

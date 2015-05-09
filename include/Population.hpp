@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <utility>
 #include <functional>
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
@@ -35,6 +36,7 @@ public:
 /* private data members */
 private:
     CollectionType genotypes;
+    const Evaluator<Genotype>* evaluator;
 
 /* public members */
 public:
@@ -46,6 +48,7 @@ public:
     void forEach(const std::function<void(const ValueType&)>& callback);
     void reverseForEach(const std::function<void(const ValueType&)>& callback);
     /* TODO curious recurring template pattern jako interface do wydobycia prywatnych iteratorów */
+    std::pair<typename CollectionType::iterator, bool> insert(const Genotype&);
     typename CollectionType::iterator begin();
     typename CollectionType::const_iterator cbegin() const;
     typename CollectionType::iterator end();
@@ -57,7 +60,7 @@ public:
 
 template <typename Genotype>
 Population<Genotype>::Population(const PopulationInitializer<Genotype>& populationInitializer,
-                          const Evaluator<Genotype>& evaluator) {
+                          const Evaluator<Genotype>& evaluator) : evaluator(&evaluator) {
     populationInitializer.initialize(genotypes, evaluator);
 }
 
@@ -101,6 +104,13 @@ void Population<Genotype>::reverseForEach(const std::function<void(const ValueTy
         callback(pair);
     });
 }
+
+template <typename Genotype>
+std::pair<typename Population<Genotype>::CollectionType::iterator, bool>
+Population<Genotype>::insert(const Genotype& genotype) {
+    ValueType pair {genotype, evaluator->evaluate(genotype)};
+    return genotypes.insert(pair);
+};
 
 template <typename Genotype>
 typename Population<Genotype>::CollectionType::iterator Population<Genotype>::begin() {

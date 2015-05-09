@@ -8,10 +8,11 @@
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
-#include "SelectionStrategy.hpp"
-#include "DefaultSelectionStrategy.hpp"
-#include "CrossoverStrategy.hpp"
-#include "MutationStrategy.hpp"
+#include "EliminationStrategy.hpp"
+#include "DefaultEliminationStrategy.hpp"
+#include "BreedingOperator.hpp"
+#include "CrossoverOperator.hpp"
+#include "MutationOperator.hpp"
 #include "EvolutionStatus.hpp"
 #include "ObservableEvolutionStatus.hpp"
 
@@ -21,9 +22,10 @@ template <typename Genotype>
 class EvolvingProcess :
         private PolymorphicDependency<GenotypeInitializer<Genotype>>,
         private PolymorphicDependency<Evaluator<Genotype>>,
-        private PolymorphicDependency<SelectionStrategy<Genotype>>,
-        private PolymorphicDependency<CrossoverStrategy<Genotype>>,
-        private PolymorphicDependency<MutationStrategy<Genotype>> {
+        private PolymorphicDependency<EliminationStrategy<Genotype>>,
+        private PolymorphicDependency<BreedingOperator<Genotype>>,
+        private PolymorphicDependency<CrossoverOperator<Genotype>>,
+        private PolymorphicDependency<MutationOperator<Genotype>> {
 private:
     unsigned int _populationSize;
 
@@ -31,15 +33,17 @@ private:
     // introduction of base classes members in order for use(auto dependency) to work
     using PolymorphicDependency<GenotypeInitializer<Genotype>>::set;
     using PolymorphicDependency<Evaluator<Genotype>>::set;
-    using PolymorphicDependency<SelectionStrategy<Genotype>>::set;
-    using PolymorphicDependency<CrossoverStrategy<Genotype>>::set;
-    using PolymorphicDependency<MutationStrategy<Genotype>>::set;
+    using PolymorphicDependency<EliminationStrategy<Genotype>>::set;
+    using PolymorphicDependency<BreedingOperator<Genotype>>::set;
+    using PolymorphicDependency<CrossoverOperator<Genotype>>::set;
+    using PolymorphicDependency<MutationOperator<Genotype>>::set;
     // aliases for easier base classes access
     using GenotypeInitializerDependency = PolymorphicDependency<GenotypeInitializer<Genotype>>;
     using EvaluatorDependency           = PolymorphicDependency<Evaluator<Genotype>>;
-    using SelectionStrategyDependency   = PolymorphicDependency<SelectionStrategy<Genotype>>;
-    using CrossoverStrategyDependency   = PolymorphicDependency<CrossoverStrategy<Genotype>>;
-    using MutationStrategyDependency    = PolymorphicDependency<MutationStrategy<Genotype>>;
+    using EliminationStrategyDependency   = PolymorphicDependency<EliminationStrategy<Genotype>>;
+    using BreedingOperatorDependency   = PolymorphicDependency<BreedingOperator<Genotype>>;
+    using CrossoverOperatorDependency   = PolymorphicDependency<CrossoverOperator<Genotype>>;
+    using MutationOperatorDependency    = PolymorphicDependency<MutationOperator<Genotype>>;
 
 public:
     EvolvingProcess(unsigned int populationSize);
@@ -53,7 +57,7 @@ public:
 template <typename Genotype>
 EvolvingProcess<Genotype>::EvolvingProcess(unsigned int populationSize) :
         _populationSize(populationSize) {
-    SelectionStrategyDependency::set(new DefaultSelectionStrategy<Genotype>());
+    EliminationStrategyDependency::set(new DefaultEliminationStrategy<Genotype>());
 }
 
 template <typename Genotype>
@@ -84,19 +88,24 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
      * doda się jakiś dependency i będzie kiszka, jak to zrobić żeby się nie narobić? */
     // check if all dependencies are properly initialized
     if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
-          SelectionStrategyDependency::get() && CrossoverStrategyDependency::get() &&
-          MutationStrategyDependency::get())) {
+          EliminationStrategyDependency::get() && BreedingOperatorDependency::get() &&
+          CrossoverOperatorDependency::get() &&
+          MutationOperatorDependency::get())) {
         throw new std::runtime_error("Dependencies aren't properly initialized. "
-                                     "Check if all dependencies were injected.");
+                                             "Check if all dependencies were injected.");
     }
 
     PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     do {
-        SelectionStrategyDependency::get()->eliminate(pop);
-        CrossoverStrategyDependency::get()->cross(pop);
-        MutationStrategyDependency::get()->mutate(pop);
+        EliminationStrategyDependency::get()->eliminate(pop);
+        while (std::distance(pop.begin(), pop.end()) < _populationSize) {
+            auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
+            auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
+            newGenotype = std::move(MutationOperatorDependency::get()->mutate(newGenotype));
+            pop.insert(newGenotype);
+        }
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }

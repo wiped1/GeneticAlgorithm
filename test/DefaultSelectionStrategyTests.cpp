@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include "Population.hpp"
-#include "DefaultSelectionStrategy.hpp"
+#include "DefaultEliminationStrategy.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
 #include "Evaluator.hpp"
@@ -13,9 +13,9 @@ using namespace gall;
 namespace {
 class IntGenotypeEvaluator : public Evaluator<Genotype<int>> {
 public:
-    virtual double evaluate(Genotype<int> &genotype) const {
+    virtual double evaluate(const Genotype<int> &genotype) const {
         double score = 0;
-        std::for_each(genotype.begin(), genotype.end(), [&](int value) {
+        std::for_each(genotype.cbegin(), genotype.cend(), [&](int value) {
             score += value;
         });
         return score;
@@ -23,7 +23,7 @@ public:
 };
 }
 
-SCENARIO("SelectionStrategy removes half of a Population that has lower fitness") {
+SCENARIO("EliminationStrategy removes half of a Population that has lower fitness") {
     GIVEN("A population of genotypes with integer genes with uneven number of genotypes") {
         Population<Genotype<int>>::CollectionType genotypes;
         genotypes.insert(std::pair<Genotype<int>, double>(
@@ -40,7 +40,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            DefaultSelectionStrategy<Genotype<int>> selectionStrategy;
+            DefaultEliminationStrategy<Genotype<int>> selectionStrategy;
             selectionStrategy.eliminate(pop);
 
             THEN("Population size has shrunken in half") {
@@ -72,7 +72,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
 
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            DefaultSelectionStrategy<Genotype<int>> selectionStrategy;
+            DefaultEliminationStrategy<Genotype<int>> selectionStrategy;
             selectionStrategy.eliminate(pop);
 
             THEN("Population size has shrunken in half") {
@@ -96,7 +96,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
         Population<Genotype<int>> pop {genotypes};
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            DefaultSelectionStrategy<Genotype<int>> selectionStrategy;
+            DefaultEliminationStrategy<Genotype<int>> selectionStrategy;
             selectionStrategy.eliminate(pop);
 
             THEN("Population size is exactly 50") {
@@ -112,7 +112,7 @@ SCENARIO("SelectionStrategy removes half of a Population that has lower fitness"
         Population<Genotype<int>> pop {genotypes};
         WHEN("Population is evaluated") {
             IntGenotypeEvaluator evaluator;
-            DefaultSelectionStrategy<Genotype<int>> selectionStrategy;
+            DefaultEliminationStrategy<Genotype<int>> selectionStrategy;
             selectionStrategy.eliminate(pop);
 
             THEN("Population size is exactly 50") {
