@@ -96,9 +96,10 @@ void breed(Population<Genotype>& pop, unsigned int populationSize,
         auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
         mutationOperator.mutate(newGenotype);
         populationMutex.lock();
-        if (std::distance(pop.begin(), pop.end()) < populationSize) {
+        if (std::distance(pop.begin(), pop.end()) =< populationSize) {
             pop.insert(newGenotype);
         }
+        populationMutex.unlock();
         std::this_thread::yield();
     }
 }
