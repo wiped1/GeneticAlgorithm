@@ -13,7 +13,7 @@
 using namespace gall;
 
 namespace {
-class MockGenotypeInitializer : public GenotypeInitializer<Genotype<int>> {
+class MockGenotypeInitializer : public GenotypeInitializer<Genotype<std::vector<int>>> {
 public:
     virtual void initialize(std::vector<int> &genes) const {
         for (int i = 0; i < 10; i++) {
@@ -22,41 +22,41 @@ public:
     }
 };
 
-class MockEvaluator : public Evaluator<Genotype<int>> {
+class MockEvaluator : public Evaluator<Genotype<std::vector<int>>> {
 public:
-    virtual double evaluate(const Genotype<int> &genotype) const {
+    virtual double evaluate(const Genotype<std::vector<int>> &genotype) const {
         return 0;
     }
 };
 
-class MockEliminationStrategy : public EliminationStrategy<Genotype<int>> {
+class MockEliminationStrategy : public EliminationStrategy<Genotype<std::vector<int>>> {
 public:
-    virtual void eliminate(Population<Genotype<int>>& population) {
+    virtual void eliminate(Population<Genotype<std::vector<int>>>& population) {
         // do nothing
     }
 };
 
-class MockBreedingOperator : public BreedingOperator<Genotype<int>> {
-    virtual std::vector<Genotype<int>> breed(const Population<Genotype<int>>& pop) const {
+class MockBreedingOperator : public BreedingOperator<Genotype<std::vector<int>>> {
+    virtual std::vector<Genotype<std::vector<int>>> breed(const Population<Genotype<std::vector<int>>>& pop) const {
         MockGenotypeInitializer initializer;
-        Genotype<int> genotype(initializer);
-        std::vector<Genotype<int>> mock{genotype};
+        Genotype<std::vector<int>> genotype(initializer);
+        std::vector<Genotype<std::vector<int>>> mock{genotype};
         return mock;
     }
 };
 
-class MockCrossoverOperator : public CrossoverOperator<Genotype<int>> {
+class MockCrossoverOperator : public CrossoverOperator<Genotype<std::vector<int>>> {
 public:
-    virtual Genotype<int> cross(std::vector<Genotype<int>>& genotypes) const {
+    virtual Genotype<std::vector<int>> cross(std::vector<Genotype<std::vector<int>>>& genotypes) const {
         MockGenotypeInitializer initializer;
-        Genotype<int> genotype(initializer);
+        Genotype<std::vector<int>> genotype(initializer);
         return genotype;
     }
 };
 
-class MockMutationOperator : public MutationOperator<Genotype<int>> {
+class MockMutationOperator : public MutationOperator<Genotype<std::vector<int>>> {
 public:
-    virtual void mutate(Genotype<int>& genotype) const {
+    virtual void mutate(Genotype<std::vector<int>>& genotype) const {
         // do nothing
     }
 };
@@ -64,7 +64,7 @@ public:
 
 SCENARIO("Evolving process uses objects defined by library users") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<Genotype<int>> process(10);
+        EvolvingProcess<Genotype<std::vector<int>>> process(10);
 
         WHEN("Dependencies are injected") {
             process << new MockGenotypeInitializer << new MockEvaluator << new MockBreedingOperator <<
@@ -72,7 +72,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
                     new MockMutationOperator;
             // great test...
             THEN("Nothing happens.") {
-                process.evolve([](ObservableEvolutionStatus<Genotype<int>>& status) {
+                process.evolve([](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) {
                     return true;
                 });
             }
@@ -80,7 +80,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
         WHEN("All dependencies are missing") {
             THEN("Exception is thrown") {
-                REQUIRE_THROWS(process.evolve([](ObservableEvolutionStatus<Genotype<int>>& status) {
+                REQUIRE_THROWS(process.evolve([](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) {
                     return true;
                 }));
             }
@@ -90,14 +90,14 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
 SCENARIO("Evolving process has user defined termination condition") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<Genotype<int>> process(10);
+        EvolvingProcess<Genotype<std::vector<int>>> process(10);
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
                 new MockCrossoverOperator() << new MockMutationOperator() <<
                 new MockEliminationStrategy();
         WHEN("Evolving process is run") {
             int generations = 0;
-            process.evolve([&](ObservableEvolutionStatus<Genotype<int>>& status) -> bool {
+            process.evolve([&](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) -> bool {
                 generations++;
                 return status.getNumberOfGenerations() >= 10;
             });
