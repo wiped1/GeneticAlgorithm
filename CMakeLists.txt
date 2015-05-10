@@ -18,7 +18,7 @@ aux_source_directory(${CMAKE_SRC_DIR} SOURCE_FILES)
 aux_source_directory(${CMAKE_TEST_DIR} TESTS_FILES)
 
 add_executable(GeneticAlgorithmTests ${MAIN_TESTS_FILE} ${SOURCE_FILES} ${TESTS_FILES})
-
+target_link_libraries(GeneticAlgorithmTests pthread)
 # Command used to execute unit tests after build
 #add_custom_command(
 #    TARGET GeneticAlgorithmTests

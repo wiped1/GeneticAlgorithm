@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 #include <exception>
+#include <thread>
+#include <mutex>
 #include "PolymorphicDependency.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
@@ -27,7 +29,8 @@ class EvolvingProcess :
         private PolymorphicDependency<CrossoverOperator<Genotype>>,
         private PolymorphicDependency<MutationOperator<Genotype>> {
 private:
-    unsigned int _populationSize;
+    unsigned int populationSize;
+    unsigned int numOfThreads;
 
     // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
@@ -46,7 +49,7 @@ private:
     using MutationOperatorDependency    = PolymorphicDependency<MutationOperator<Genotype>>;
 
 public:
-    EvolvingProcess(unsigned int populationSize);
+    EvolvingProcess(unsigned int populationSize, unsigned int numOfThreads = 1);
     template <typename Dependency>
     EvolvingProcess<Genotype>& operator<<(Dependency dependency);
     template <typename Dependency>
@@ -55,8 +58,8 @@ public:
 };
 
 template <typename Genotype>
-EvolvingProcess<Genotype>::EvolvingProcess(unsigned int populationSize) :
-        _populationSize(populationSize) {
+EvolvingProcess<Genotype>::EvolvingProcess(unsigned int populationSize, unsigned int numOfThreads) :
+        populationSize(populationSize), numOfThreads(numOfThreads) {
     EliminationStrategyDependency::set(new DefaultEliminationStrategy<Genotype>());
 }
 
@@ -82,6 +85,25 @@ void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotyp
     status.incrementNumberOfGenerations();
 }
 
+std::mutex populationMutex;
+
+template <typename Genotype>
+void breed(Population<Genotype>& pop, unsigned int populationSize,
+        const BreedingOperator<Genotype>& breedingOperator,
+        const CrossoverOperator<Genotype>& crossoverOperator,
+        const MutationOperator<Genotype>& mutationOperator) {
+    while (std::distance(pop.begin(), pop.end()) < populationSize) {
+        auto parentGenotypes = breedingOperator.breed(pop);
+        auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
+        mutationOperator.mutate(newGenotype);
+        populationMutex.lock();
+        if (std::distance(pop.begin(), pop.end()) < populationSize) {
+            pop.insert(newGenotype);
+        }
+        std::this_thread::yield();
+    }
+}
+
 template <typename Genotype>
 void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
     /* TODO ta funkcja jest strasznie nieodporna na zmiany, łatwo zapomnieć jeśli
@@ -95,17 +117,29 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
                                              "Check if all dependencies were injected.");
     }
 
-    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
+    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(),
+                                                          populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     do {
         EliminationStrategyDependency::get()->eliminate(pop);
-        while (std::distance(pop.begin(), pop.end()) < _populationSize) {
-            auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
-            auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
-            MutationOperatorDependency::get()->mutate(newGenotype);
-            pop.insert(newGenotype);
+        std::mutex populationMutex;
+        std::vector<std::thread> threads;
+        for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
+            threads.emplace_back(breed<Genotype>, std::ref(pop), populationSize,
+                    std::ref(*BreedingOperatorDependency::get()),
+                    std::ref(*CrossoverOperatorDependency::get()),
+                    std::ref(*MutationOperatorDependency::get()));
         }
+        std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
+            thread.join();
+        });
+//        while (std::distance(pop.begin(), pop.end()) < _populationSize) {
+//            auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
+//            auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
+//            MutationOperatorDependency::get()->mutate(newGenotype);
+//            pop.insert(newGenotype);
+//        }
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }
