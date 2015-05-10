@@ -123,7 +123,6 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
     EvolutionStatus<Genotype> status(pop);
     do {
         EliminationStrategyDependency::get()->eliminate(pop);
-        std::mutex populationMutex;
         std::vector<std::thread> threads;
         for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
             threads.emplace_back(breed<Genotype>, std::ref(pop), populationSize,
