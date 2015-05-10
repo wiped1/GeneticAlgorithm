@@ -103,7 +103,7 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
         while (std::distance(pop.begin(), pop.end()) < _populationSize) {
             auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
             auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
-            newGenotype = std::move(MutationOperatorDependency::get()->mutate(newGenotype));
+            MutationOperatorDependency::get()->mutate(newGenotype);
             pop.insert(newGenotype);
         }
         updateEvolutionStatus(status, pop);

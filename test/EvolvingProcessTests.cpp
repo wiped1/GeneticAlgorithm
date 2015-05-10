@@ -56,8 +56,8 @@ public:
 
 class MockMutationOperator : public MutationOperator<Genotype<int>> {
 public:
-    virtual Genotype<int> mutate(Genotype<int> genotype) const {
-        return genotype;
+    virtual void mutate(Genotype<int>& genotype) const {
+        // do nothing
     }
 };
 }
