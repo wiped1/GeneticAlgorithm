@@ -98,14 +98,22 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
     PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), _populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
+    std::vector<Genotype> newGenotypes;
     do {
+        newGenotypes.clear();
         EliminationStrategyDependency::get()->eliminate(pop);
-        while (std::distance(pop.begin(), pop.end()) < _populationSize) {
+        auto popSize = std::distance(pop.cbegin(), pop.cend());
+
+        while (popSize + newGenotypes.size() < _populationSize) {
             auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
             auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
             MutationOperatorDependency::get()->mutate(newGenotype);
-            pop.insert(newGenotype);
+            newGenotypes.push_back(newGenotype);
         }
+
+        for(auto &newGenotype : newGenotypes)
+            pop.insert(newGenotype);
+
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }
