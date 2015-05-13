@@ -91,21 +91,21 @@ unsigned int calculateDistance(Collection c) {
 }
 
 template <typename Genotype>
-void breed(Population<Genotype>& pop, typename Population<Genotype>::CollectionType& auxPopulation,
+void breed(Population<Genotype>& pop, std::vector<Genotype>& auxGenotypes,
         unsigned int maxPopulationSize,
         const BreedingOperator<Genotype>& breedingOperator,
         const CrossoverOperator<Genotype>& crossoverOperator,
         const MutationOperator<Genotype>& mutationOperator, std::mutex& populationMutex) {
     auto currentPopulationSize = calculateDistance(pop);
     /* distance is calculated from remaining genotypes in population added to auxiliary population members */
-    auto distance = [&]() { return currentPopulationSize + calculateDistance(auxPopulation); };
+    auto distance = [&]() { return currentPopulationSize + calculateDistance(auxGenotypes); };
     while (distance() < maxPopulationSize) {
         auto parentGenotypes = breedingOperator.breed(pop);
         auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
         mutationOperator.mutate(newGenotype);
         populationMutex.lock();
         if (distance() <= maxPopulationSize) {
-            pop.insert(newGenotype);
+            auxGenotypes.push_back(std::move(newGenotype));
         }
         populationMutex.unlock();
         std::this_thread::yield();
@@ -122,22 +122,21 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
           CrossoverOperatorDependency::get() &&
           MutationOperatorDependency::get())) {
         throw new std::runtime_error("Dependencies aren't properly initialized. "
-                                             "Check if all dependencies were injected.");
+                                     "Check if all dependencies were injected.");
     }
 
-    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(),
-                                                          populationSize);
+    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     std::mutex populationMutex;
     do {
         EliminationStrategyDependency::get()->eliminate(pop);
         /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
-        typename Population<Genotype>::CollectionType auxPopulation;
+        std::vector<Genotype> auxGenotypes;
         std::vector<std::thread> threads;
         for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
             threads.emplace_back(breed<Genotype>, std::ref(pop),
-                    std::ref(auxPopulation), populationSize,
+                    std::ref(auxGenotypes), populationSize,
                     std::ref(*BreedingOperatorDependency::get()),
                     std::ref(*CrossoverOperatorDependency::get()),
                     std::ref(*MutationOperatorDependency::get()), std::ref(populationMutex));
@@ -145,7 +144,10 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
         std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
             thread.join();
         });
-        pop.insert(auxPopulation.begin(), auxPopulation.end());
+        /* insert elements from auxiliary genotypes vector to population */
+        std::for_each(auxGenotypes.begin(), auxGenotypes.end(), [&](auto genotype) {
+            pop.insert(genotype);
+        });
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }
