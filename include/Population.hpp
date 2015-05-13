@@ -115,12 +115,6 @@ Population<Genotype>::insert(const Genotype& genotype) {
 };
 
 template <typename Genotype>
-void Population<Genotype>::insert(typename Population<Genotype>::CollectionType::iterator begin,
-            typename Population<Genotype>::CollectionType::iterator end) {
-    genotypes.insert(begin, end);
-}
-
-template <typename Genotype>
 typename Population<Genotype>::CollectionType::iterator Population<Genotype>::begin() {
     return genotypes.begin();
 }

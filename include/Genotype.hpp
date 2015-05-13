@@ -10,9 +10,11 @@ namespace gall {
 template <typename CollectionType>
 class Genotype {
 private:
+    /* TODO rename CollectionType template parameter to something in lines of C */
     CollectionType genes;
 
 public:
+    /* TODO change alias type to CollectionType */
     using Collection = CollectionType;
     Genotype(const GenotypeInitializer<Genotype<CollectionType>>& genotypeInitializer);
     Genotype(CollectionType genes);
