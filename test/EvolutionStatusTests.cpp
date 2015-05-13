@@ -9,7 +9,7 @@ using namespace gall;
 SCENARIO("EvolutionStatus is used in safe representation of current evolution data") {
     GIVEN("Initialized EvolutionStatus") {
         std::vector<int> vec = {0};
-        Genotype<int> genotype(vec);
+        Genotype<std::vector<int>> genotype(vec);
         Population<decltype(genotype)>::CollectionType genotypes;
         genotypes.emplace(Population<decltype(genotype)>::ValueType(genotype, 0));
         Population<decltype(genotype)> pop(genotypes);
