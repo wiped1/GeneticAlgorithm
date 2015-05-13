@@ -46,7 +46,7 @@ public:
     Population(const PopulationInitializer<Genotype>& populationInitializer,
                const Evaluator<Genotype>& evaluator);
     Population(CollectionType genotypes);
-    void forEach(const std::function<void(const ValueType&)>& callback);
+    void forEach(const std::function<void(const ValueType&)>& callback) const;
     void reverseForEach(const std::function<void(const ValueType&)>& callback);
     /* TODO curious recurring template pattern jako interface do wydobycia prywatnych iteratorów */
     std::pair<typename CollectionType::iterator, bool> insert(const Genotype&);
@@ -82,7 +82,7 @@ Population<Genotype>::Population(CollectionType genotypes) : genotypes(std::move
  *     });
  */
 template <typename Genotype>
-void Population<Genotype>::forEach(const std::function<void(const ValueType&)>& callback) {
+void Population<Genotype>::forEach(const std::function<void(const ValueType&)>& callback) const {
     #if 0
     /* leaving for future reference */
     /*for (auto it = genotypes.begin(); it != genotypes.end(); it++) {
