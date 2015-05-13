@@ -85,18 +85,26 @@ void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotyp
     status.incrementNumberOfGenerations();
 }
 
+template <typename Collection>
+unsigned int calculateDistance(Collection c) {
+    return static_cast<unsigned int>(std::distance(c.cbegin(), c.cend()));
+}
 
 template <typename Genotype>
-void breed(Population<Genotype>& pop, unsigned int populationSize,
+void breed(Population<Genotype>& pop, typename Population<Genotype>::CollectionType& auxPopulation,
+        unsigned int maxPopulationSize,
         const BreedingOperator<Genotype>& breedingOperator,
         const CrossoverOperator<Genotype>& crossoverOperator,
         const MutationOperator<Genotype>& mutationOperator, std::mutex& populationMutex) {
-    while (std::distance(pop.begin(), pop.end()) < populationSize) {
+    auto currentPopulationSize = calculateDistance(pop);
+    /* distance is calculated from remaining genotypes in population added to auxiliary population members */
+    auto distance = [&]() { return currentPopulationSize + calculateDistance(auxPopulation); };
+    while (distance() < maxPopulationSize) {
         auto parentGenotypes = breedingOperator.breed(pop);
         auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
         mutationOperator.mutate(newGenotype);
         populationMutex.lock();
-        if (std::distance(pop.begin(), pop.end()) =< populationSize) {
+        if (distance() <= maxPopulationSize) {
             pop.insert(newGenotype);
         }
         populationMutex.unlock();
@@ -124,9 +132,12 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
     std::mutex populationMutex;
     do {
         EliminationStrategyDependency::get()->eliminate(pop);
+        /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
+        typename Population<Genotype>::CollectionType auxPopulation;
         std::vector<std::thread> threads;
         for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
-            threads.emplace_back(breed<Genotype>, std::ref(pop), populationSize,
+            threads.emplace_back(breed<Genotype>, std::ref(pop),
+                    std::ref(auxPopulation), populationSize,
                     std::ref(*BreedingOperatorDependency::get()),
                     std::ref(*CrossoverOperatorDependency::get()),
                     std::ref(*MutationOperatorDependency::get()), std::ref(populationMutex));
@@ -134,12 +145,7 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
         std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
             thread.join();
         });
-//        while (std::distance(pop.begin(), pop.end()) < _populationSize) {
-//            auto parentGenotypes = BreedingOperatorDependency::get()->breed(pop);
-//            auto newGenotype = std::move(CrossoverOperatorDependency::get()->cross(parentGenotypes));
-//            MutationOperatorDependency::get()->mutate(newGenotype);
-//            pop.insert(newGenotype);
-//        }
+        pop.insert(auxPopulation.begin(), auxPopulation.end());
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }

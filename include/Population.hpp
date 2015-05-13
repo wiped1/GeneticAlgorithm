@@ -50,6 +50,7 @@ public:
     void reverseForEach(const std::function<void(const ValueType&)>& callback);
     /* TODO curious recurring template pattern jako interface do wydobycia prywatnych iteratorów */
     std::pair<typename CollectionType::iterator, bool> insert(const Genotype&);
+    void insert(typename CollectionType::iterator begin, typename CollectionType::iterator end);
     typename CollectionType::iterator begin();
     typename CollectionType::const_iterator cbegin() const;
     typename CollectionType::iterator end();
@@ -112,6 +113,12 @@ Population<Genotype>::insert(const Genotype& genotype) {
     ValueType pair {genotype, evaluator->evaluate(genotype)};
     return genotypes.insert(pair);
 };
+
+template <typename Genotype>
+void Population<Genotype>::insert(typename Population<Genotype>::CollectionType::iterator begin,
+            typename Population<Genotype>::CollectionType::iterator end) {
+    genotypes.insert(begin, end);
+}
 
 template <typename Genotype>
 typename Population<Genotype>::CollectionType::iterator Population<Genotype>::begin() {
