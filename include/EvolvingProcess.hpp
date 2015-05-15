@@ -51,10 +51,15 @@ private:
 public:
     EvolvingProcess(unsigned int populationSize, unsigned int numOfThreads = 1);
     template <typename Dependency>
-    EvolvingProcess<Genotype>& operator<<(Dependency dependency);
+    EvolvingProcess<Genotype>& operator<<(Dependency);
     template <typename Dependency>
-    EvolvingProcess<Genotype>& use(Dependency dependency);
-    void evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition);
+    EvolvingProcess<Genotype>& use(Dependency);
+    void evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>&);
+
+private:
+    void checkDependencies();
+    void eliminationRoutine(Population<Genotype>&);
+    void breedingRoutine(Population<Genotype>&);
 };
 
 template <typename Genotype>
@@ -90,12 +95,31 @@ unsigned int calculateDistance(Collection c) {
     return static_cast<unsigned int>(std::distance(c.cbegin(), c.cend()));
 }
 
+
 template <typename Genotype>
-void breed(Population<Genotype>& pop, std::vector<Genotype>& auxGenotypes,
-        unsigned int maxPopulationSize,
-        const BreedingOperator<Genotype>& breedingOperator,
-        const CrossoverOperator<Genotype>& crossoverOperator,
-        const MutationOperator<Genotype>& mutationOperator, std::mutex& populationMutex) {
+void EvolvingProcess<Genotype>::checkDependencies() {
+    if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
+          EliminationStrategyDependency::get() && BreedingOperatorDependency::get() &&
+          CrossoverOperatorDependency::get() &&
+          MutationOperatorDependency::get())) {
+        throw new std::runtime_error("Dependencies aren't properly initialized. "
+                                     "Check if all dependencies were injected.");
+    }
+}
+
+template <typename Genotype>
+void EvolvingProcess<Genotype>::eliminationRoutine(Population<Genotype>& population) {
+    EliminationStrategyDependency::get()->eliminate(population);
+}
+
+template <typename Genotype>
+void breedPopulation(Population<Genotype> &pop,
+                     std::vector<Genotype> &auxGenotypes,
+                     unsigned int maxPopulationSize,
+                     const BreedingOperator<Genotype> &breedingOperator,
+                     const CrossoverOperator<Genotype> &crossoverOperator,
+                     const MutationOperator<Genotype> &mutationOperator,
+                     std::mutex &populationMutex) {
     auto currentPopulationSize = calculateDistance(pop);
     /* distance is calculated from remaining genotypes in population added to auxiliary population members */
     auto distance = [&]() { return currentPopulationSize + calculateDistance(auxGenotypes); };
@@ -113,41 +137,37 @@ void breed(Population<Genotype>& pop, std::vector<Genotype>& auxGenotypes,
 }
 
 template <typename Genotype>
-void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
-    /* TODO ta funkcja jest strasznie nieodporna na zmiany, łatwo zapomnieć jeśli
-     * doda się jakiś dependency i będzie kiszka, jak to zrobić żeby się nie narobić? */
-    // check if all dependencies are properly initialized
-    if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
-          EliminationStrategyDependency::get() && BreedingOperatorDependency::get() &&
-          CrossoverOperatorDependency::get() &&
-          MutationOperatorDependency::get())) {
-        throw new std::runtime_error("Dependencies aren't properly initialized. "
-                                     "Check if all dependencies were injected.");
+void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population) {
+    std::mutex populationMutex;
+    /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
+    std::vector<Genotype> auxGenotypes;
+    std::vector<std::thread> threads;
+    for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
+        threads.emplace_back(breedPopulation<Genotype>, std::ref(population),
+                             std::ref(auxGenotypes), populationSize,
+                             std::ref(*BreedingOperatorDependency::get()),
+                             std::ref(*CrossoverOperatorDependency::get()),
+                             std::ref(*MutationOperatorDependency::get()),
+                             std::ref(populationMutex));
     }
+    std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
+        thread.join();
+    });
+    /* insert elements from auxiliary genotypes vector to population */
+    std::for_each(auxGenotypes.begin(), auxGenotypes.end(), [&](auto genotype) {
+        population.insert(genotype);
+    });
+}
 
+template <typename Genotype>
+void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
+    checkDependencies();
     PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
-    std::mutex populationMutex;
     do {
-        EliminationStrategyDependency::get()->eliminate(pop);
-        /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
-        std::vector<Genotype> auxGenotypes;
-        std::vector<std::thread> threads;
-        for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
-            threads.emplace_back(breed<Genotype>, std::ref(pop),
-                    std::ref(auxGenotypes), populationSize,
-                    std::ref(*BreedingOperatorDependency::get()),
-                    std::ref(*CrossoverOperatorDependency::get()),
-                    std::ref(*MutationOperatorDependency::get()), std::ref(populationMutex));
-        }
-        std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
-            thread.join();
-        });
-        /* insert elements from auxiliary genotypes vector to population */
-        std::for_each(auxGenotypes.begin(), auxGenotypes.end(), [&](auto genotype) {
-            pop.insert(genotype);
-        });
+        eliminationRoutine(pop);
+        breedingRoutine(pop);
         updateEvolutionStatus(status, pop);
     } while (!terminationCondition(status));
 }
