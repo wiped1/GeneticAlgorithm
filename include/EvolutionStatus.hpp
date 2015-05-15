@@ -45,7 +45,7 @@ unsigned int EvolutionStatus<Genotype>::getNumberOfGenerations() {
 
 template <typename Genotype>
 double EvolutionStatus<Genotype>::getHighestFitness() {
-    return currentHighestFitness;
+    return std::prev(population->cend())->second;
 }
 
 template <typename Genotype>
@@ -55,7 +55,7 @@ double EvolutionStatus<Genotype>::getFitnessDelta() {
 
 template <typename Genotype>
 const Genotype& EvolutionStatus<Genotype>::getGenotypeWithBestFitness() {
-    return *bestGenotype;
+    return std::prev(population->cend())->first;
 }
 
 template <typename Genotype>
