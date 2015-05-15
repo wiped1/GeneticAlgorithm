@@ -37,7 +37,7 @@ public:
 /* private data members */
 private:
     CollectionType genotypes;
-    const Evaluator<Genotype>* evaluator;
+    const Evaluator<Genotype>* evaluator = nullptr;
 
 /* public members */
 public:
@@ -50,7 +50,8 @@ public:
     void reverseForEach(const std::function<void(const ValueType&)>& callback);
     /* TODO curious recurring template pattern jako interface do wydobycia prywatnych iteratorów */
     std::pair<typename CollectionType::iterator, bool> insert(const Genotype&);
-    void insert(typename CollectionType::iterator begin, typename CollectionType::iterator end);
+    template <typename InputIt>
+    void insert(InputIt first, InputIt last);
     typename CollectionType::iterator begin();
     typename CollectionType::const_iterator cbegin() const;
     typename CollectionType::iterator end();
@@ -58,6 +59,9 @@ public:
     void erase(typename Population<Genotype>::CollectionType::iterator pos);
     void erase(typename Population<Genotype>::CollectionType::iterator begin,
                typename Population<Genotype>::CollectionType::iterator end);
+
+private:
+    ValueType makePair(Genotype genotype);
 };
 
 template <typename Genotype>
@@ -108,11 +112,28 @@ void Population<Genotype>::reverseForEach(const std::function<void(const ValueTy
 }
 
 template <typename Genotype>
+typename Population<Genotype>::ValueType
+Population<Genotype>::makePair(Genotype genotype) {
+    if (evaluator == nullptr) {
+        throw std::runtime_error("Population: Evaluator is not initialized.");
+    }
+    return ValueType{genotype, evaluator->evaluate(genotype)};
+};
+
+template <typename Genotype>
 std::pair<typename Population<Genotype>::CollectionType::iterator, bool>
 Population<Genotype>::insert(const Genotype& genotype) {
-    ValueType pair {genotype, evaluator->evaluate(genotype)};
-    return genotypes.insert(pair);
+    return genotypes.insert(std::move(makePair(genotype)));
 };
+
+template <typename Genotype>
+template <typename InputIt>
+void Population<Genotype>::insert(InputIt first, InputIt last) {
+    std::for_each(first, last, [&](auto genotype) {
+        /* makePair invoked using this, because it's in lambda expression */
+        genotypes.insert(std::move(this->makePair(genotype)));
+    });
+}
 
 template <typename Genotype>
 typename Population<Genotype>::CollectionType::iterator Population<Genotype>::begin() {

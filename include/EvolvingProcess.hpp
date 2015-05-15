@@ -83,10 +83,6 @@ EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::use(Dependency dependency)
 
 template <typename Genotype>
 void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotype> population) {
-    // population genotypes are sorted high to low, first element is bound to be the one with highest fitness
-//    auto it = population.cbegin();
-//    status.setGenotypeWithBestFitness((*it).first);
-//    status.updateFitness((*it).second);
     status.incrementNumberOfGenerations();
 }
 
@@ -153,10 +149,7 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
     std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
         thread.join();
     });
-    /* insert elements from auxiliary genotypes vector to population */
-    std::for_each(auxGenotypes.begin(), auxGenotypes.end(), [&](auto genotype) {
-        population.insert(genotype);
-    });
+    population.insert(auxGenotypes.begin(), auxGenotypes.end());
 }
 
 template <typename Genotype>
