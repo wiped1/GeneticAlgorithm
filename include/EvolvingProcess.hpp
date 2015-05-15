@@ -84,9 +84,9 @@ EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::use(Dependency dependency)
 template <typename Genotype>
 void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotype> population) {
     // population genotypes are sorted high to low, first element is bound to be the one with highest fitness
-    auto it = population.cbegin();
-    status.setGenotypeWithBestFitness((*it).first);
-    status.updateFitness((*it).second);
+//    auto it = population.cbegin();
+//    status.setGenotypeWithBestFitness((*it).first);
+//    status.updateFitness((*it).second);
     status.incrementNumberOfGenerations();
 }
 
