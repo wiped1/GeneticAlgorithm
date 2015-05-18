@@ -6,6 +6,7 @@
 #include <exception>
 #include <thread>
 #include <mutex>
+#include "boost/timer/timer.hpp"
 #include "PolymorphicDependency.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
@@ -116,11 +117,17 @@ void breedPopulation(Population<Genotype>& pop,
                      const CrossoverOperator<Genotype>& crossoverOperator,
                      const MutationOperator<Genotype>& mutationOperator,
                      std::mutex& populationMutex) {
+    /* pop won't change throughout breedPopulation execution,
+     * it's iterators are bidirectional, and calculate distance will perform
+     * pop.size() steps in order to calculate the distance, hence we assign it
+     * to local variable */
     auto currentPopulationSize = calculateDistance(pop);
-    /* distance is calculated from remaining genotypes in population added to auxiliary population members */
+    /* distance is calculated from remaining genotypes in population added
+     * to auxiliary population members auxGenotypes is a vector which has
+     * random access iterators, calculateDistance will perform in constant time */
     auto distance = [&]() { return currentPopulationSize + calculateDistance(auxGenotypes); };
     while (distance() < maxPopulationSize) {
-        auto parentGenotypes = breedingOperator.breed(pop);
+        auto parentGenotypes = std::move(breedingOperator.breed(pop));
         auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
         mutationOperator.mutate(newGenotype);
         populationMutex.lock();
