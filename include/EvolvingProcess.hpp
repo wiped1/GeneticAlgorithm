@@ -6,6 +6,9 @@
 #include <exception>
 #include <thread>
 #include <mutex>
+#if defined GALL_USE_TIMER
+    #include <boost/timer/timer.hpp>
+#endif
 #include "PolymorphicDependency.hpp"
 #include "GenotypeInitializer.hpp"
 #include "PopulationInitializer.hpp"
@@ -159,6 +162,9 @@ void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolut
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     do {
+        #if defined GALL_USE_TIMER
+            boost::timer::auto_cpu_timer t;
+        #endif
         eliminationRoutine(pop);
         breedingRoutine(pop);
         updateEvolutionStatus(status, pop);
