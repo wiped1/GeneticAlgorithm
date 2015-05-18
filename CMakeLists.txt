@@ -5,7 +5,6 @@ project(GeneticAlgorithm)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # CMake directories
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(CMAKE_SRC_DIR                  "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(CMAKE_INCLUDE_DIR              "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -17,14 +16,14 @@ set(MAIN_TESTS_FILE ${CMAKE_TEST_DIR}/mainTests.cpp)
 aux_source_directory(${CMAKE_SRC_DIR} SOURCE_FILES)
 aux_source_directory(${CMAKE_TEST_DIR} TESTS_FILES)
 
+find_package(Boost COMPONENTS system timer)
+
 add_executable(GeneticAlgorithmTests ${MAIN_TESTS_FILE} ${SOURCE_FILES} ${TESTS_FILES})
-target_link_libraries(GeneticAlgorithmTests pthread)
-# Command used to execute unit tests after build
-#add_custom_command(
-#    TARGET GeneticAlgorithmTests
-#    POST_BUILD
-#    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/GeneticAlgorithmTests
-#)
+target_link_libraries(GeneticAlgorithmTests
+    pthread
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_TIMER_LIBRARY}
+)
 
 enable_testing(true)
 add_test(

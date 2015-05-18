@@ -124,6 +124,7 @@ SCENARIO("Evolving process has user defined termination condition") {
             }
         }
     }
+
     GIVEN("An EvolvingProcess instantiation with 1000 threads") {
         EvolvingProcess<Genotype<std::vector<int>>> process(100, 1000);
 
