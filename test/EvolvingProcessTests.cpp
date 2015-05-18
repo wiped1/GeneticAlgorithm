@@ -124,5 +124,22 @@ SCENARIO("Evolving process has user defined termination condition") {
             }
         }
     }
+    GIVEN("An EvolvingProcess instantiation with 1000 threads") {
+        EvolvingProcess<Genotype<std::vector<int>>> process(100, 1000);
+
+        process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
+        new MockCrossoverOperator() << new MockMutationOperator() <<
+        new MockEliminationStrategy();
+        WHEN("Evolving process is run") {
+            int generations = 0;
+            process.evolve([&](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) -> bool {
+                generations++;
+                return status.getNumberOfGenerations() >= 10;
+            });
+            THEN("Evolving process quits at tenth generation") {
+                REQUIRE(generations == 10);
+            }
+        }
+    }
 }
 

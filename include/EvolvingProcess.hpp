@@ -87,7 +87,7 @@ void updateEvolutionStatus(EvolutionStatus<Genotype>& status, Population<Genotyp
 }
 
 template <typename Collection>
-unsigned int calculateDistance(Collection c) {
+unsigned int calculateDistance(const Collection& c) {
     return static_cast<unsigned int>(std::distance(c.cbegin(), c.cend()));
 }
 
@@ -109,13 +109,13 @@ void EvolvingProcess<Genotype>::eliminationRoutine(Population<Genotype>& populat
 }
 
 template <typename Genotype>
-void breedPopulation(Population<Genotype> &pop,
-                     std::vector<Genotype> &auxGenotypes,
+void breedPopulation(Population<Genotype>& pop,
+                     std::vector<Genotype>& auxGenotypes,
                      unsigned int maxPopulationSize,
-                     const BreedingOperator<Genotype> &breedingOperator,
-                     const CrossoverOperator<Genotype> &crossoverOperator,
-                     const MutationOperator<Genotype> &mutationOperator,
-                     std::mutex &populationMutex) {
+                     const BreedingOperator<Genotype>& breedingOperator,
+                     const CrossoverOperator<Genotype>& crossoverOperator,
+                     const MutationOperator<Genotype>& mutationOperator,
+                     std::mutex& populationMutex) {
     auto currentPopulationSize = calculateDistance(pop);
     /* distance is calculated from remaining genotypes in population added to auxiliary population members */
     auto distance = [&]() { return currentPopulationSize + calculateDistance(auxGenotypes); };
