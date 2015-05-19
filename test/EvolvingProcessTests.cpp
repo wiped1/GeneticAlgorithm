@@ -9,6 +9,7 @@
 #include "CrossoverOperator.hpp"
 #include "MutationOperator.hpp"
 #include "ObservableEvolutionStatus.hpp"
+#include "EvolvingEnvironment.hpp"
 
 using namespace gall;
 
@@ -64,7 +65,8 @@ public:
 
 SCENARIO("Evolving process uses objects defined by library users") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<Genotype<std::vector<int>>> process(10);
+        EvolvingEnvironment::populationSize = 100;
+        EvolvingProcess<Genotype<std::vector<int>>> process;
 
         WHEN("Dependencies are injected") {
             process << new MockGenotypeInitializer << new MockEvaluator << new MockBreedingOperator <<
@@ -73,6 +75,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
             // great test...
             THEN("Nothing happens.") {
                 process.evolve([](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) {
+                    REQUIRE(status.getPopulationSize() == 100);
                     return true;
                 });
             }
@@ -90,7 +93,7 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
 SCENARIO("Evolving process has user defined termination condition") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<Genotype<std::vector<int>>> process(10);
+        EvolvingProcess<Genotype<std::vector<int>>> process;
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
                 new MockCrossoverOperator() << new MockMutationOperator() <<
@@ -108,7 +111,8 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 4 threads") {
-        EvolvingProcess<Genotype<std::vector<int>>> process(10, 4);
+        EvolvingEnvironment::numberOfThreads = 4;
+        EvolvingProcess<Genotype<std::vector<int>>> process;
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
         new MockCrossoverOperator() << new MockMutationOperator() <<
@@ -126,11 +130,13 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 1000 threads") {
-        EvolvingProcess<Genotype<std::vector<int>>> process(100, 1000);
+        EvolvingEnvironment::numberOfThreads = 1000;
+        EvolvingProcess<Genotype<std::vector<int>>> process;
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
         new MockCrossoverOperator() << new MockMutationOperator() <<
         new MockEliminationStrategy();
+
         WHEN("Evolving process is run") {
             int generations = 0;
             process.evolve([&](ObservableEvolutionStatus<Genotype<std::vector<int>>>& status) -> bool {

@@ -20,6 +20,7 @@
 #include "MutationOperator.hpp"
 #include "EvolutionStatus.hpp"
 #include "ObservableEvolutionStatus.hpp"
+#include "EvolvingEnvironment.hpp"
 
 namespace gall {
 
@@ -32,8 +33,8 @@ class EvolvingProcess :
         private PolymorphicDependency<CrossoverOperator<Genotype>>,
         private PolymorphicDependency<MutationOperator<Genotype>> {
 private:
-    unsigned int populationSize;
-    unsigned int numOfThreads;
+//    unsigned int populationSize;
+//    unsigned int numOfThreads;
 
     // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
@@ -52,7 +53,7 @@ private:
     using MutationOperatorDependency    = PolymorphicDependency<MutationOperator<Genotype>>;
 
 public:
-    EvolvingProcess(unsigned int populationSize, unsigned int numOfThreads = 1);
+    EvolvingProcess();
     template <typename Dependency>
     EvolvingProcess<Genotype>& operator<<(Dependency);
     template <typename Dependency>
@@ -66,8 +67,7 @@ private:
 };
 
 template <typename Genotype>
-EvolvingProcess<Genotype>::EvolvingProcess(unsigned int populationSize, unsigned int numOfThreads) :
-        populationSize(populationSize), numOfThreads(numOfThreads) {
+EvolvingProcess<Genotype>::EvolvingProcess() {
     EliminationStrategyDependency::set(new DefaultEliminationStrategy<Genotype>());
 }
 
@@ -147,9 +147,9 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
     /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
     std::vector<Genotype> auxGenotypes;
     std::vector<std::thread> threads;
-    for (std::vector<std::thread>::size_type i = 0; i < numOfThreads; i++) {
+    for (std::vector<std::thread>::size_type i = 0; i < EvolvingEnvironment::numberOfThreads; i++) {
         threads.emplace_back(breedPopulation<Genotype>, std::ref(population),
-                             std::ref(auxGenotypes), populationSize,
+                             std::ref(auxGenotypes), EvolvingEnvironment::populationSize,
                              std::ref(*BreedingOperatorDependency::get()),
                              std::ref(*CrossoverOperatorDependency::get()),
                              std::ref(*MutationOperatorDependency::get()),
@@ -164,7 +164,8 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
 template <typename Genotype>
 void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
     checkDependencies();
-    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(), populationSize);
+    PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(),
+                                                          EvolvingEnvironment::populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     do {
