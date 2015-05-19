@@ -24,10 +24,10 @@ public:
     void forEach(const std::function<void(typename CollectionType::value_type&)>&);
     void reverseForEach(const std::function<void(typename CollectionType::value_type&)>&);
     typename CollectionType::iterator begin();
-    typename CollectionType::iterator rbegin();
+    typename CollectionType::reverse_iterator rbegin();
     typename CollectionType::const_iterator cbegin() const;
     typename CollectionType::iterator end();
-    typename CollectionType::iterator rend();
+    typename CollectionType::reverse_iterator rend();
     typename CollectionType::const_iterator cend() const;
 };
 
@@ -79,7 +79,7 @@ typename CollectionType::iterator Genotype<CollectionType>::begin() {
 }
 
 template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::rbegin() {
+typename CollectionType::reverse_iterator Genotype<CollectionType>::rbegin() {
     return genes.rbegin();
 }
 
@@ -94,7 +94,7 @@ typename CollectionType::iterator Genotype<CollectionType>::end() {
 }
 
 template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::rend() {
+typename CollectionType::reverse_iterator Genotype<CollectionType>::rend() {
     return genes.rend();
 }
 
