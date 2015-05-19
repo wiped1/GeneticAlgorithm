@@ -6,5 +6,6 @@ namespace gall {
         static unsigned int genesCount;
         static unsigned int parentsPerChild;
         static unsigned int numberOfThreads = 1;
+        static unsigned int targetGenerationsCount;
     }
 }
