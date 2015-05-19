@@ -147,9 +147,9 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
     /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
     std::vector<Genotype> auxGenotypes;
     std::vector<std::thread> threads;
-    for (std::vector<std::thread>::size_type i = 0; i < EvolvingEnvironment::numberOfThreads; i++) {
+    for (std::vector<std::thread>::size_type i = 0; i < EvolvingEnvironmentProvider::getInstance().numberOfThreads; i++) {
         threads.emplace_back(breedPopulation<Genotype>, std::ref(population),
-                             std::ref(auxGenotypes), EvolvingEnvironment::populationSize,
+                             std::ref(auxGenotypes), EvolvingEnvironmentProvider::getInstance().populationSize,
                              std::ref(*BreedingOperatorDependency::get()),
                              std::ref(*CrossoverOperatorDependency::get()),
                              std::ref(*MutationOperatorDependency::get()),
@@ -165,7 +165,7 @@ template <typename Genotype>
 void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
     checkDependencies();
     PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(),
-                                                          EvolvingEnvironment::populationSize);
+                                                          EvolvingEnvironmentProvider::getInstance().populationSize);
     Population<Genotype> pop(populationInitializer, *EvaluatorDependency::get());
     EvolutionStatus<Genotype> status(pop);
     do {

@@ -65,7 +65,7 @@ public:
 
 SCENARIO("Evolving process uses objects defined by library users") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingEnvironment::populationSize = 100;
+        EvolvingEnvironmentProvider::getInstance().populationSize = 100;
         EvolvingProcess<Genotype<std::vector<int>>> process;
 
         WHEN("Dependencies are injected") {
@@ -111,7 +111,7 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 4 threads") {
-        EvolvingEnvironment::numberOfThreads = 4;
+        EvolvingEnvironmentProvider::getInstance().numberOfThreads = 4;
         EvolvingProcess<Genotype<std::vector<int>>> process;
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
@@ -130,7 +130,7 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 1000 threads") {
-        EvolvingEnvironment::numberOfThreads = 1000;
+        EvolvingEnvironmentProvider::getInstance().numberOfThreads = 1000;
         EvolvingProcess<Genotype<std::vector<int>>> process;
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
