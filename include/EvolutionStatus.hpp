@@ -10,7 +10,6 @@ namespace gall {
 template <typename Genotype>
 class EvolutionStatus : public ObservableEvolutionStatus<Genotype> {
 private:
-    const Genotype* bestGenotype; /* TODO remove? */
     const Population<Genotype>* population;
     unsigned int numberOfGenerations;
 
@@ -28,7 +27,7 @@ public:
 
 template <typename Genotype>
 EvolutionStatus<Genotype>::EvolutionStatus(const Population<Genotype> &population) :
-        bestGenotype(nullptr), population(&population), numberOfGenerations(0) {
+        population(&population), numberOfGenerations(0) {
     // do nothing
 }
 

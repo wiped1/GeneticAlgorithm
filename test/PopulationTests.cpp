@@ -17,7 +17,7 @@ public:
 
 class MockGenotypeInitializer : public GenotypeInitializer<Genotype<std::vector<int>>> {
 public:
-    void initialize(Genotype<std::vector<int>>::Collection &genes) const {
+    void initialize(Genotype<std::vector<int>>::CollectionType &genes) const {
         // do nothing
     };
 };

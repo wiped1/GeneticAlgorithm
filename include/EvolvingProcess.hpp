@@ -33,9 +33,6 @@ class EvolvingProcess :
         private PolymorphicDependency<CrossoverOperator<Genotype>>,
         private PolymorphicDependency<MutationOperator<Genotype>> {
 private:
-//    unsigned int populationSize;
-//    unsigned int numOfThreads;
-
     // TODO zamienić na makro, które wygeneruje te wszystkie usingi
     // introduction of base classes members in order for use(auto dependency) to work
     using PolymorphicDependency<GenotypeInitializer<Genotype>>::set;

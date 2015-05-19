@@ -7,15 +7,14 @@
 
 namespace gall {
 
-template <typename CollectionType>
+template <typename C>
 class Genotype {
 private:
-    /* TODO rename CollectionType template parameter to something in lines of C */
-    CollectionType genes;
+    C genes;
 
 public:
     /* TODO change alias type to CollectionType */
-    using Collection = CollectionType;
+    using CollectionType = C;
     Genotype(const GenotypeInitializer<Genotype<CollectionType>>& genotypeInitializer);
     Genotype(CollectionType genes);
     bool operator==(const Genotype<CollectionType>& other);
@@ -55,7 +54,7 @@ bool Genotype<CollectionType>::operator<(const Genotype<CollectionType>& other) 
 
 
 template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::insert(typename Collection::iterator pos, const typename CollectionType::value_type& value) {
+typename CollectionType::iterator Genotype<CollectionType>::insert(typename CollectionType::iterator pos, const typename CollectionType::value_type& value) {
     return genes.insert(pos, value);
 }
 
