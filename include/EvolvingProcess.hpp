@@ -155,10 +155,6 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
     std::for_each(threads.begin(), threads.end(), [](std::thread& thread) {
         thread.join();
     });
-    MutationOperator<Genotype>& mutationOperator = *MutationOperatorDependency::get();
-    std::for_each(population.begin(), population.end(), [&](auto genotypePair) {
-        mutationOperator.mutate(genotypePair.first);
-    });
     population.insert(auxGenotypes.begin(), auxGenotypes.end());
 
 }
