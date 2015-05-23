@@ -25,6 +25,9 @@ public:
     C& collection() {
         return genes;
     }
+    const C& ccollection() const {
+        return genes;
+    }
     typename CollectionType::iterator begin();
     typename CollectionType::reverse_iterator rbegin();
     typename CollectionType::const_iterator cbegin() const;
