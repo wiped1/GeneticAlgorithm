@@ -49,14 +49,18 @@ MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::MutationProbabili
 template <typename Genotype, typename Gene, typename RandomEngine>
 template <typename Functor>
 void MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::add(double range) {
-    dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<Functor>(new Functor), range));
-    distSum += range;
+    if (range > 0) {
+        dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<Functor>(new Functor), range));
+        distSum += range;
+    }
 }
 
 template <typename Genotype, typename Gene, typename RandomEngine>
 void MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::add(MutationFunctor<Genotype, Gene>* functor, double range) {
-    dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<MutationFunctor<Genotype, Gene>>(std::move(functor)), range));
-    distSum += range;
+    if (range > 0) {
+        dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<MutationFunctor<Genotype, Gene>>(std::move(functor)), range));
+        distSum += range;
+    }
 }
 
 /*
@@ -73,10 +77,10 @@ inline const MutationFunctor<Genotype, Gene>& MutationProbabilityDistribution<Ge
     double walkingSum = 0;
     /* TODO zamienić na std::find */
     for (auto it = dist.cbegin(); it != dist.cend(); it++) {
-        if (walkingSum <= roll && walkingSum + it->second >= roll) {
+        walkingSum += it->second;
+        if (walkingSum >= roll) {
             return *it->first;
         }
-        walkingSum += it->second;
     }
     return nullFunctor;
 }
