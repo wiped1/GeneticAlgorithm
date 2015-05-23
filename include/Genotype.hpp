@@ -22,6 +22,9 @@ public:
     typename CollectionType::iterator insert(typename CollectionType::iterator pos, const typename CollectionType::value_type& value);
     void forEach(const std::function<void(typename CollectionType::value_type&)>&);
     void reverseForEach(const std::function<void(typename CollectionType::value_type&)>&);
+    C& collection() {
+        return genes;
+    }
     typename CollectionType::iterator begin();
     typename CollectionType::reverse_iterator rbegin();
     typename CollectionType::const_iterator cbegin() const;
