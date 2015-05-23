@@ -3,18 +3,18 @@
 #include <functional>
 #include "MutationFunctor.hpp"
 
-template <typename T>
-struct NullMutationFunctor : public MutationFunctor<T> {
-    virtual void operator()(T&) const {
+template <typename Genotype, typename Gene>
+struct NullMutationFunctor : public MutationFunctor<Genotype, Gene> {
+    virtual void operator()(Genotype&, Gene&) const {
         throw new std::runtime_error("NullMutationFunctor called, probably no MutationFunctors were added");
     }
 };
 
-template <typename T, typename RandomEngine>
+template <typename Genotype, typename Gene, typename RandomEngine>
 class MutationProbabilityDistribution {
 /* private aliases */
 private:
-    using FunctionProbabilityPair = std::pair<std::unique_ptr<MutationFunctor<T>>, double>;
+    using FunctionProbabilityPair = std::pair<std::unique_ptr<MutationFunctor<Genotype, Gene>>, double>;
 
 /* private members */
 private:
@@ -22,7 +22,7 @@ private:
      * jest jakiś spośób, żeby zwrócić go w taki sposób (w funkcji roll)
      * żeby obiekt nie został usunięty?
      * const &&? */
-    NullMutationFunctor<T> nullFunctor;
+    NullMutationFunctor<Genotype, Gene> nullFunctor;
     RandomEngine* rng;
     std::vector<FunctionProbabilityPair> dist;
     double distSum = 0;
@@ -32,30 +32,30 @@ public:
     MutationProbabilityDistribution(RandomEngine& rng);
     template <typename Functor>
     void add(double range);
-    void add(MutationFunctor<T>* functor, double range);
-    const MutationFunctor<T>& draw() const;
-    const MutationFunctor<T>& draw(double min, double max) const;
+    void add(MutationFunctor<Genotype, Gene>* functor, double range);
+    const MutationFunctor<Genotype, Gene>& draw() const;
+    const MutationFunctor<Genotype, Gene>& draw(double min, double max) const;
 /* private functions */
 private:
-    inline const MutationFunctor<T>& roll(std::uniform_real_distribution<double> d) const;
+    inline const MutationFunctor<Genotype, Gene>& roll(std::uniform_real_distribution<double> d) const;
 };
 
-template <typename T, typename RandomEngine>
-MutationProbabilityDistribution<T, RandomEngine>::MutationProbabilityDistribution(
+template <typename Genotype, typename Gene, typename RandomEngine>
+MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::MutationProbabilityDistribution(
         RandomEngine& rng) : rng(&rng) {
     // do nothing
 }
 
-template <typename T, typename RandomEngine>
+template <typename Genotype, typename Gene, typename RandomEngine>
 template <typename Functor>
-void MutationProbabilityDistribution<T, RandomEngine>::add(double range) {
+void MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::add(double range) {
     dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<Functor>(new Functor), range));
     distSum += range;
 }
 
-template <typename T, typename RandomEngine>
-void MutationProbabilityDistribution<T, RandomEngine>::add(MutationFunctor<T>* functor, double range) {
-    dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<MutationFunctor<T>>(std::move(functor)), range));
+template <typename Genotype, typename Gene, typename RandomEngine>
+void MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::add(MutationFunctor<Genotype, Gene>* functor, double range) {
+    dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<MutationFunctor<Genotype, Gene>>(std::move(functor)), range));
     distSum += range;
 }
 
@@ -66,11 +66,12 @@ void MutationProbabilityDistribution<T, RandomEngine>::add(MutationFunctor<T>* f
  * For two MutationFunctors both with range 0.5 roll within range [0.0, 0.5] returns the first functor
  * and roll within range (0.5, 1.0] return the second functor.
  */
-template <typename T, typename RandomEngine>
-inline const MutationFunctor<T>& MutationProbabilityDistribution<T, RandomEngine>::roll(
+template <typename Genotype, typename Gene, typename RandomEngine>
+inline const MutationFunctor<Genotype, Gene>& MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::roll(
         std::uniform_real_distribution<double> d) const {
     double roll = d(*rng);
     double walkingSum = 0;
+    /* TODO zamienić na std::find */
     for (auto it = dist.cbegin(); it != dist.cend(); it++) {
         if (walkingSum <= roll && walkingSum + it->second >= roll) {
             return *it->first;
@@ -80,14 +81,14 @@ inline const MutationFunctor<T>& MutationProbabilityDistribution<T, RandomEngine
     return nullFunctor;
 }
 
-template <typename T, typename RandomEngine>
-const MutationFunctor<T>& MutationProbabilityDistribution<T, RandomEngine>::draw() const {
+template <typename Genotype, typename Gene, typename RandomEngine>
+const MutationFunctor<Genotype, Gene>& MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::draw() const {
     std::uniform_real_distribution<double> d(0, distSum);
     return roll(d);
 }
 
-template <typename T, typename RandomEngine>
-const MutationFunctor<T>& MutationProbabilityDistribution<T, RandomEngine>::draw(double min, double max) const {
+template <typename Genotype, typename Gene, typename RandomEngine>
+const MutationFunctor<Genotype, Gene>& MutationProbabilityDistribution<Genotype, Gene, RandomEngine>::draw(double min, double max) const {
     std::uniform_real_distribution<double> d(min, max);
     return roll(d);
 }
