@@ -24,7 +24,8 @@ SCENARIO("MutationProbabilityDistribution is used to draw MutationFunctors from 
         std::random_device rd;
         std::mt19937 rng(rd());
         MutationProbabilityDistribution<std::string, std::mt19937> dist(rng);
-        WHEN("MockMutationFunctorOne is added") {
+        WHEN("MockMutationFunctorOne is added using template function") {
+            dist.add<MockMutationFunctorOne>(0.5);
             dist.add<MockMutationFunctorOne>(0.5);
 
             THEN("Draw returns reference to object of type MockMutationFunctorOne") {
@@ -33,6 +34,18 @@ SCENARIO("MutationProbabilityDistribution is used to draw MutationFunctors from 
             }
             THEN("Returned reference to MockMutationFunctorOne is valid, and is able to change"
                  "empty string to 'mock1'") {
+                std::string str;
+                dist.draw()(str);
+                REQUIRE(str == "mock1");
+            }
+        }
+        WHEN("MockMutationFunctorOne is added using function that accepts pointer") {
+            dist.add(new MockMutationFunctorOne, 0.5);
+            THEN("Draw returns reference to object of type MockMutationFunctorOne") {
+                CHECK_NOTHROW(dynamic_cast<const MockMutationFunctorOne&>(dist.draw()));
+            }
+            THEN("Returned reference to MockMutationFunctorOne is valid, and is able to change"
+                         "empty string to 'mock1'") {
                 std::string str;
                 dist.draw()(str);
                 REQUIRE(str == "mock1");

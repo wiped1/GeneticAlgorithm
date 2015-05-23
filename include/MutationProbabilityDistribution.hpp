@@ -31,7 +31,8 @@ public:
     MutationProbabilityDistribution() = delete;
     MutationProbabilityDistribution(RandomEngine& rng);
     template <typename Functor>
-    bool add(double range);
+    void add(double range);
+    void add(MutationFunctor<T>* functor, double range);
     const MutationFunctor<T>& draw() const;
     const MutationFunctor<T>& draw(double min, double max) const;
 /* private functions */
@@ -47,8 +48,14 @@ MutationProbabilityDistribution<T, RandomEngine>::MutationProbabilityDistributio
 
 template <typename T, typename RandomEngine>
 template <typename Functor>
-bool MutationProbabilityDistribution<T, RandomEngine>::add(double range) {
+void MutationProbabilityDistribution<T, RandomEngine>::add(double range) {
     dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<Functor>(new Functor), range));
+    distSum += range;
+}
+
+template <typename T, typename RandomEngine>
+void MutationProbabilityDistribution<T, RandomEngine>::add(MutationFunctor<T>* functor, double range) {
+    dist.emplace_back(FunctionProbabilityPair(std::unique_ptr<MutationFunctor<T>>(std::move(functor)), range));
     distSum += range;
 }
 
