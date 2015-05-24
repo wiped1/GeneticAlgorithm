@@ -66,7 +66,8 @@ public:
 SCENARIO("Evolving process uses objects defined by library users") {
     GIVEN("An EvolvingProcess instantiation") {
         EvolvingEnvironmentProvider::getInstance().populationSize = 100;
-        EvolvingProcess<Genotype<std::vector<int>>> process;
+        std::mt19937 prng;
+        EvolvingProcess<Genotype<std::vector<int>>, std::mt19937> process(prng);
 
         WHEN("Dependencies are injected") {
             process << new MockGenotypeInitializer << new MockEvaluator << new MockBreedingOperator <<
@@ -93,7 +94,8 @@ SCENARIO("Evolving process uses objects defined by library users") {
 
 SCENARIO("Evolving process has user defined termination condition") {
     GIVEN("An EvolvingProcess instantiation") {
-        EvolvingProcess<Genotype<std::vector<int>>> process;
+        std::mt19937 prng;
+        EvolvingProcess<Genotype<std::vector<int>>, std::mt19937> process(prng);
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
                 new MockCrossoverOperator() << new MockMutationOperator() <<
@@ -111,8 +113,9 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 4 threads") {
+        std::mt19937 prng;
         EvolvingEnvironmentProvider::getInstance().numberOfThreads = 4;
-        EvolvingProcess<Genotype<std::vector<int>>> process;
+        EvolvingProcess<Genotype<std::vector<int>>, std::mt19937> process(prng);
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
         new MockCrossoverOperator() << new MockMutationOperator() <<
@@ -130,8 +133,9 @@ SCENARIO("Evolving process has user defined termination condition") {
     }
 
     GIVEN("An EvolvingProcess instantiation with 1000 threads") {
+        std::mt19937 prng;
         EvolvingEnvironmentProvider::getInstance().numberOfThreads = 1000;
-        EvolvingProcess<Genotype<std::vector<int>>> process;
+        EvolvingProcess<Genotype<std::vector<int>>, std::mt19937> process(prng);
 
         process << new MockGenotypeInitializer() << new MockEvaluator() << new MockBreedingOperator() <<
         new MockCrossoverOperator() << new MockMutationOperator() <<

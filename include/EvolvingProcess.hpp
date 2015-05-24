@@ -24,7 +24,7 @@
 
 namespace gall {
 
-template <typename Genotype>
+template <typename Genotype, typename RNG>
 class EvolvingProcess :
         private PolymorphicDependency<GenotypeInitializer<Genotype>>,
         private PolymorphicDependency<Evaluator<Genotype>>,
@@ -48,13 +48,14 @@ private:
     using BreedingOperatorDependency   = PolymorphicDependency<BreedingOperator<Genotype>>;
     using CrossoverOperatorDependency   = PolymorphicDependency<CrossoverOperator<Genotype>>;
     using MutationOperatorDependency    = PolymorphicDependency<MutationOperator<Genotype>>;
+    RNG* rng;
 
 public:
-    EvolvingProcess();
+    EvolvingProcess(RNG& rng);
     template <typename Dependency>
-    EvolvingProcess<Genotype>& operator<<(Dependency);
+    EvolvingProcess<Genotype, RNG>& operator<<(Dependency);
     template <typename Dependency>
-    EvolvingProcess<Genotype>& use(Dependency);
+    EvolvingProcess<Genotype, RNG>& use(Dependency);
     void evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>&);
 
 private:
@@ -63,20 +64,20 @@ private:
     void breedingRoutine(Population<Genotype>&);
 };
 
-template <typename Genotype>
-EvolvingProcess<Genotype>::EvolvingProcess() {
+template <typename Genotype, typename RNG>
+EvolvingProcess<Genotype, RNG>::EvolvingProcess(RNG& rng) : rng(&rng) {
     EliminationStrategyDependency::set(new DefaultEliminationStrategy<Genotype>());
 }
 
-template <typename Genotype>
+template <typename Genotype, typename RNG>
 template <typename Dependency>
-EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::operator<<(Dependency dependency) {
+EvolvingProcess<Genotype, RNG>& EvolvingProcess<Genotype, RNG>::operator<<(Dependency dependency) {
     return use(dependency);
 }
 
-template <typename Genotype>
+template <typename Genotype, typename RNG>
 template <typename Dependency>
-EvolvingProcess<Genotype>& EvolvingProcess<Genotype>::use(Dependency dependency) {
+EvolvingProcess<Genotype, RNG>& EvolvingProcess<Genotype, RNG>::use(Dependency dependency) {
     set(dependency);
     return *this;
 }
@@ -92,8 +93,8 @@ unsigned int calculateDistance(const Collection& c) {
 }
 
 
-template <typename Genotype>
-void EvolvingProcess<Genotype>::checkDependencies() {
+template <typename Genotype, typename RNG>
+void EvolvingProcess<Genotype, RNG>::checkDependencies() {
     if (!(GenotypeInitializerDependency::get() && EvaluatorDependency::get() &&
           EliminationStrategyDependency::get() && BreedingOperatorDependency::get() &&
           CrossoverOperatorDependency::get() &&
@@ -103,13 +104,14 @@ void EvolvingProcess<Genotype>::checkDependencies() {
     }
 }
 
-template <typename Genotype>
-void EvolvingProcess<Genotype>::eliminationRoutine(Population<Genotype>& population) {
+template <typename Genotype, typename RNG>
+void EvolvingProcess<Genotype, RNG>::eliminationRoutine(Population<Genotype>& population) {
     EliminationStrategyDependency::get()->eliminate(population);
 }
 
-template <typename Genotype>
+template <typename Genotype, typename RNG>
 void breedPopulation(Population<Genotype>& pop,
+                     RNG* rng,
                      std::vector<Genotype>& auxGenotypes,
                      unsigned int maxPopulationSize,
                      const BreedingOperator<Genotype>& breedingOperator,
@@ -125,10 +127,18 @@ void breedPopulation(Population<Genotype>& pop,
      * to auxiliary population members auxGenotypes is a vector which has
      * random access iterators, calculateDistance will perform in constant time */
     auto distance = [&]() { return currentPopulationSize + calculateDistance(auxGenotypes); };
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
     while (distance() < maxPopulationSize) {
         auto parentGenotypes = std::move(breedingOperator.breed(pop));
-        auto newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
-        mutationOperator.mutate(newGenotype);
+        double result = dist(*rng);
+        typename Genotype::CollectionType c;
+        Genotype newGenotype(c);
+        if (result <= 0.1) {
+            newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
+        } else {
+            newGenotype = std::move(parentGenotypes.front());
+            mutationOperator.mutate(newGenotype);
+        }
         populationMutex.lock();
         if (distance() <= maxPopulationSize) {
             auxGenotypes.push_back(std::move(newGenotype));
@@ -138,14 +148,14 @@ void breedPopulation(Population<Genotype>& pop,
     }
 }
 
-template <typename Genotype>
-void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population) {
+template <typename Genotype, typename RNG>
+void EvolvingProcess<Genotype, RNG>::breedingRoutine(Population<Genotype>& population) {
     std::mutex populationMutex;
     /* auxPopulation is used as an auxiliary container to store newly bred genotypes */
     std::vector<Genotype> auxGenotypes;
     std::vector<std::thread> threads;
     for (std::vector<std::thread>::size_type i = 0; i < EvolvingEnvironmentProvider::getInstance().numberOfThreads; i++) {
-        threads.emplace_back(breedPopulation<Genotype>, std::ref(population),
+        threads.emplace_back(breedPopulation<Genotype, RNG>, std::ref(population), rng,
                              std::ref(auxGenotypes), EvolvingEnvironmentProvider::getInstance().populationSize,
                              std::ref(*BreedingOperatorDependency::get()),
                              std::ref(*CrossoverOperatorDependency::get()),
@@ -159,8 +169,8 @@ void EvolvingProcess<Genotype>::breedingRoutine(Population<Genotype>& population
 
 }
 
-template <typename Genotype>
-void EvolvingProcess<Genotype>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
+template <typename Genotype, typename RNG>
+void EvolvingProcess<Genotype, RNG>::evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>& terminationCondition) {
     checkDependencies();
     PopulationInitializer<Genotype> populationInitializer(*GenotypeInitializerDependency::get(),
                                                           EvolvingEnvironmentProvider::getInstance().populationSize);
