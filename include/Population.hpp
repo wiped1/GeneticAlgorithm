@@ -32,7 +32,7 @@ public:
     /* one could consider chosing std::map instead of std::set
      * but std::map is sorted using <Key, T> and doesn't allow storing Keys with same value.
      * Genotypes have to be sorted by fitness, and fitness can be the same hence set of pairs */
-    using CollectionType = std::set<ValueType, GenotypeFitnessPairComparator<Genotype>>;
+    using CollectionType = std::multiset<ValueType, GenotypeFitnessPairComparator<Genotype>>;
 
 /* private data members */
 private:
