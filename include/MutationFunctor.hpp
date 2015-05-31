@@ -4,6 +4,6 @@
 
 template <typename Genotype>
 struct MutationFunctor {
-    virtual void operator()(Genotype&) const = 0;
+    virtual void mutate(Genotype&) const = 0;
     virtual ~MutationFunctor() { }
 };

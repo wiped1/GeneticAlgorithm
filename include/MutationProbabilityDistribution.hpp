@@ -5,7 +5,7 @@
 
 template <typename Genotype>
 struct NullMutationFunctor : public MutationFunctor<Genotype> {
-    virtual void operator()(Genotype&) const {
+    virtual void mutate(Genotype&) const {
         throw new std::runtime_error("NullMutationFunctor called, probably no MutationFunctors were added");
     }
 };

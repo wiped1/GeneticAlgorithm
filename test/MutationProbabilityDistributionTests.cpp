@@ -8,12 +8,12 @@
 
 namespace {
 struct MockMutationFunctorOne : MutationFunctor<std::string> {
-    virtual void operator()(std::string& str) const {
+    virtual void mutate(std::string& str) const {
         str = "mock1";
     }
 };
 struct MockMutationFunctorTwo : MutationFunctor<std::string> {
-    virtual void operator()(std::string& str) const {
+    virtual void mutate(std::string& str) const {
         str = "mock2";
     }
 };
@@ -35,7 +35,7 @@ SCENARIO("MutationProbabilityDistribution is used to draw MutationFunctors from 
             THEN("Returned reference to MockMutationFunctorOne is valid, and is able to change"
                  "empty string to 'mock1'") {
                 std::string str;
-                dist.draw()(str);
+                dist.draw().mutate(str);
                 REQUIRE(str == "mock1");
             }
         }
@@ -47,14 +47,14 @@ SCENARIO("MutationProbabilityDistribution is used to draw MutationFunctors from 
             THEN("Returned reference to MockMutationFunctorOne is valid, and is able to change"
                          "empty string to 'mock1'") {
                 std::string str;
-                dist.draw()(str);
+                dist.draw().mutate(str);
                 REQUIRE(str == "mock1");
             }
         }
         WHEN("No MutationFunctor is added, and draw is called") {
             THEN("Exception is thrown") {
                 std::string str;
-                REQUIRE_THROWS(dist.draw()(str));
+                REQUIRE_THROWS(dist.draw().mutate(str));
             }
         }
     }
