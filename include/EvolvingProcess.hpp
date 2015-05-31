@@ -49,6 +49,7 @@ private:
     using CrossoverOperatorDependency   = PolymorphicDependency<CrossoverOperator<Genotype>>;
     using MutationOperatorDependency    = PolymorphicDependency<MutationOperator<Genotype>>;
     RNG* rng;
+    double crossoverProbability;
 
 public:
     EvolvingProcess(RNG& rng);
@@ -56,6 +57,7 @@ public:
     EvolvingProcess<Genotype, RNG>& operator<<(Dependency);
     template <typename Dependency>
     EvolvingProcess<Genotype, RNG>& use(Dependency);
+    void setCrossoverProbability(double probability);
     void evolve(const std::function<bool(ObservableEvolutionStatus<Genotype>& status)>&);
 
 private:
@@ -65,7 +67,8 @@ private:
 };
 
 template <typename Genotype, typename RNG>
-EvolvingProcess<Genotype, RNG>::EvolvingProcess(RNG& rng) : rng(&rng) {
+EvolvingProcess<Genotype, RNG>::EvolvingProcess(RNG& rng) : rng(&rng),
+        crossoverProbability(0.1) {
     EliminationStrategyDependency::set(new DefaultEliminationStrategy<Genotype>());
 }
 
@@ -80,6 +83,11 @@ template <typename Dependency>
 EvolvingProcess<Genotype, RNG>& EvolvingProcess<Genotype, RNG>::use(Dependency dependency) {
     set(dependency);
     return *this;
+}
+
+template <typename Genotype, typename RNG>
+void EvolvingProcess<Genotype, RNG>::setCrossoverProbability(double probability) {
+    crossoverProbability = probability;
 }
 
 template <typename Genotype>
@@ -112,6 +120,7 @@ void EvolvingProcess<Genotype, RNG>::eliminationRoutine(Population<Genotype>& po
 template <typename Genotype, typename RNG>
 void breedPopulation(Population<Genotype>& pop,
                      RNG* rng,
+                     double crossoverProbability,
                      std::vector<Genotype>& auxGenotypes,
                      unsigned int maxPopulationSize,
                      const BreedingOperator<Genotype>& breedingOperator,
@@ -133,7 +142,7 @@ void breedPopulation(Population<Genotype>& pop,
         double result = dist(*rng);
         typename Genotype::CollectionType c;
         Genotype newGenotype(c);
-        if (result <= 0.1) {
+        if (result <= crossoverProbability) {
             newGenotype = std::move(crossoverOperator.cross(parentGenotypes));
         } else {
             newGenotype = std::move(parentGenotypes.front());
@@ -155,7 +164,7 @@ void EvolvingProcess<Genotype, RNG>::breedingRoutine(Population<Genotype>& popul
     std::vector<Genotype> auxGenotypes;
     std::vector<std::thread> threads;
     for (std::vector<std::thread>::size_type i = 0; i < EvolvingEnvironmentProvider::getInstance().numberOfThreads; i++) {
-        threads.emplace_back(breedPopulation<Genotype, RNG>, std::ref(population), rng,
+        threads.emplace_back(breedPopulation<Genotype, RNG>, std::ref(population), rng, crossoverProbability,
                              std::ref(auxGenotypes), EvolvingEnvironmentProvider::getInstance().populationSize,
                              std::ref(*BreedingOperatorDependency::get()),
                              std::ref(*CrossoverOperatorDependency::get()),
