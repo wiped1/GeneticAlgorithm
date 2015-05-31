@@ -2,8 +2,8 @@
 
 #include <stdexcept>
 
-template <typename Genotype>
+template <typename GenotypeCollection>
 struct MutationFunctor {
-    virtual void mutate(Genotype&) const = 0;
+    virtual void mutate(GenotypeCollection&) const = 0;
     virtual ~MutationFunctor() { }
 };
