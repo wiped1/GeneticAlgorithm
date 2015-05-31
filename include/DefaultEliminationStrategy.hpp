@@ -18,10 +18,10 @@ public:
 
 template <typename T>
 void DefaultEliminationStrategy<T>::eliminate(Population<T> &pop) {
-    long range = static_cast<long>(std::ceil(std::distance(pop.cbegin(), pop.cend()) / 2.0)); /* 2.0 as floating point to prevent cast */
-    auto begin = pop.begin();
+    long range = static_cast<long>(std::ceil(pop.asCollection().size() / 2.0)); /* 2.0 as floating point to prevent cast */
+    auto begin = pop.asCollection().begin();
     auto end = std::next(begin, range);
-    pop.erase(begin, end);
+    pop.asCollection().erase(begin, end);
 }
 
 }

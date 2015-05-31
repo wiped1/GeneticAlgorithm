@@ -15,7 +15,7 @@ class IntGenotypeEvaluator : public Evaluator<Genotype<std::vector<int>>> {
 public:
     virtual double evaluate(const Genotype<std::vector<int>> &genotype) const {
         double score = 0;
-        std::for_each(genotype.cbegin(), genotype.cend(), [&](int value) {
+        std::for_each(genotype.asCollection().cbegin(), genotype.asCollection().cend(), [&](int value) {
             score += value;
         });
         return score;
@@ -44,13 +44,14 @@ SCENARIO("EliminationStrategy removes half of a Population that has lower fitnes
             selectionStrategy.eliminate(pop);
 
             THEN("Population size has shrunken in half") {
-                REQUIRE(std::distance(pop.begin(), pop.end()) == 2);
+                REQUIRE(pop.asCollection().size() == 2);
+
             }
             THEN("Genotypes that were left are sorted in correct order") {
-                auto it = pop.begin();
-                REQUIRE(*(*it).first.cbegin() == 3);
+                auto it = pop.asCollection().begin();
+                REQUIRE(*(*it).first.asCollection().cbegin() == 3);
                 it = std::next(it);
-                REQUIRE(*(*it).first.cbegin() == 4);
+                REQUIRE(*(*it).first.asCollection().cbegin() == 4);
             }
         }
     }
@@ -76,15 +77,15 @@ SCENARIO("EliminationStrategy removes half of a Population that has lower fitnes
             selectionStrategy.eliminate(pop);
 
             THEN("Population size has shrunken in half") {
-                REQUIRE(std::distance(pop.begin(), pop.end()) == 3);
+                REQUIRE(pop.asCollection().size() == 3);
             }
             THEN("Genotypes that were left are sorted in correct order") {
-                auto it = pop.begin();
-                REQUIRE(*(*it).first.cbegin() == 3);
+                auto it = pop.asCollection().begin();
+                REQUIRE(*(*it).first.asCollection().cbegin() == 3);
                 it = std::next(it);
-                REQUIRE(*(*it).first.cbegin() == 4);
+                REQUIRE(*(*it).first.asCollection().cbegin() == 4);
                 it = std::next(it);
-                REQUIRE(*(*it).first.cbegin() == 5);
+                REQUIRE(*(*it).first.asCollection().cbegin() == 5);
             }
         }
     }
@@ -100,7 +101,7 @@ SCENARIO("EliminationStrategy removes half of a Population that has lower fitnes
             selectionStrategy.eliminate(pop);
 
             THEN("Population size is exactly 50") {
-                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
+                REQUIRE(pop.asCollection().size() == 50);
             }
         }
     }
@@ -116,7 +117,7 @@ SCENARIO("EliminationStrategy removes half of a Population that has lower fitnes
             selectionStrategy.eliminate(pop);
 
             THEN("Population size is exactly 50") {
-                REQUIRE(std::distance(pop.begin(), pop.end()) == 50);
+                REQUIRE(pop.asCollection().size() == 50);
             }
         }
     }

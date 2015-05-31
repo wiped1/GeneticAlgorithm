@@ -11,7 +11,7 @@ using namespace gall;
 class MockEvaluator : public Evaluator<Genotype<std::vector<int>>> {
 public:
     double evaluate(const Genotype<std::vector<int>> &genotype) const {
-        return *genotype.cbegin();
+        return *genotype.asCollection().cbegin();
     }
 };
 
@@ -30,7 +30,7 @@ SCENARIO("Population is used to store genotypes") {
         Population<Genotype<std::vector<int>>> pop{initializer, evaluator};
 
         //precheck
-        REQUIRE(std::distance(pop.cbegin(), pop.cend()) == 0);
+        REQUIRE(pop.asCollection().size() == 0);
 
         // vector of genotypes that are going to be added to population
         std::vector<Genotype<std::vector<int>>> newGenotypes;
@@ -43,15 +43,15 @@ SCENARIO("Population is used to store genotypes") {
 
             THEN("Genotypes were added to the population") {
                 // check if genotypes store the same value
-                REQUIRE(*pop.begin()->first.cbegin() == 0);
-                REQUIRE(*std::next(pop.begin(), 1)->first.cbegin() == 1);
-                REQUIRE(*std::next(pop.begin(), 2)->first.cbegin() == 2);
-                REQUIRE(*std::next(pop.begin(), 3)->first.cbegin() == 3);
+                REQUIRE(*pop.asCollection().begin()->first.asCollection().cbegin() == 0);
+                REQUIRE(*std::next(pop.asCollection().begin(), 1)->first.asCollection().cbegin() == 1);
+                REQUIRE(*std::next(pop.asCollection().begin(), 2)->first.asCollection().cbegin() == 2);
+                REQUIRE(*std::next(pop.asCollection().begin(), 3)->first.asCollection().cbegin() == 3);
                 // check if fitness is the same
-                REQUIRE(pop.begin()->second == 0);
-                REQUIRE(std::next(pop.begin(), 1)->second == 1);
-                REQUIRE(std::next(pop.begin(), 2)->second == 2);
-                REQUIRE(std::next(pop.begin(), 3)->second == 3);
+                REQUIRE(pop.asCollection().begin()->second == 0);
+                REQUIRE(std::next(pop.asCollection().begin(), 1)->second == 1);
+                REQUIRE(std::next(pop.asCollection().begin(), 2)->second == 2);
+                REQUIRE(std::next(pop.asCollection().begin(), 3)->second == 3);
             }
         }
     }

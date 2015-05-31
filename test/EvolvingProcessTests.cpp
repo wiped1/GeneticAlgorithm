@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <vector>
+#include "Genotype.hpp"
+#include "Population.hpp"
 #include "EvolvingProcess.hpp"
 #include "GenotypeInitializer.hpp"
 #include "Evaluator.hpp"

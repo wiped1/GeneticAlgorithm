@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-template <typename Genotype, typename Gene>
+template <typename Genotype>
 struct MutationFunctor {
     virtual void operator()(Genotype&) const = 0;
     virtual ~MutationFunctor() { }

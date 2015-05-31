@@ -122,7 +122,7 @@ void breedPopulation(Population<Genotype>& pop,
      * it's iterators are bidirectional, and calculate distance will perform
      * pop.size() steps in order to calculate the distance, hence we assign it
      * to local variable */
-    auto currentPopulationSize = calculateDistance(pop);
+    auto currentPopulationSize = calculateDistance(pop.asCollection());
     /* distance is calculated from remaining genotypes in population added
      * to auxiliary population members auxGenotypes is a vector which has
      * random access iterators, calculateDistance will perform in constant time */

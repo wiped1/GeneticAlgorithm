@@ -15,97 +15,43 @@ private:
 public:
     /* TODO change alias type to CollectionType */
     using CollectionType = C;
-    Genotype(const GenotypeInitializer<Genotype<CollectionType>>& genotypeInitializer);
-    Genotype(CollectionType genes);
-    bool operator==(const Genotype<CollectionType>& other);
-    bool operator<(const Genotype<CollectionType>& other) const;
-    typename CollectionType::iterator insert(typename CollectionType::iterator pos, const typename CollectionType::value_type& value);
-    void forEach(const std::function<void(typename CollectionType::value_type&)>&);
-    void reverseForEach(const std::function<void(typename CollectionType::value_type&)>&);
-    C& collection() {
-        return genes;
-    }
-    const C& ccollection() const {
-        return genes;
-    }
-    typename CollectionType::iterator begin();
-    typename CollectionType::reverse_iterator rbegin();
-    typename CollectionType::const_iterator cbegin() const;
-    typename CollectionType::iterator end();
-    typename CollectionType::reverse_iterator rend();
-    typename CollectionType::const_iterator cend() const;
+    Genotype(const GenotypeInitializer<Genotype<C>>& genotypeInitializer);
+    Genotype(C genes);
+    bool operator==(const Genotype<C>& other);
+    bool operator<(const Genotype<C>& other) const;
+    C& asCollection();
+    const C& asCollection() const;
 };
 
-template <typename CollectionType>
-Genotype<CollectionType>::Genotype(const GenotypeInitializer<Genotype<CollectionType>>& genotypeInitializer) :
+template <typename C>
+Genotype<C>::Genotype(const GenotypeInitializer<Genotype<C>>& genotypeInitializer) :
         genes() {
     genotypeInitializer.initialize(genes);
 }
 
-template <typename CollectionType>
-Genotype<CollectionType>::Genotype(CollectionType genes) : genes(std::move(genes)) {
+template <typename C>
+Genotype<C>::Genotype(C genes) : genes(std::move(genes)) {
     // do nothing
 }
 
-template <typename CollectionType>
-bool Genotype<CollectionType>::operator==(const Genotype<CollectionType>& other) {
+template <typename C>
+bool Genotype<C>::operator==(const Genotype<C>& other) {
     return genes == other.genes;
 }
 
-template <typename CollectionType>
-bool Genotype<CollectionType>::operator<(const Genotype<CollectionType>& other) const {
+template <typename C>
+bool Genotype<C>::operator<(const Genotype<C>& other) const {
     return std::lexicographical_compare(genes.cbegin(), genes.cend(),
-                                        other.cbegin(), other.cend());
+                                        other.asCollection().cbegin(), other.asCollection().cend());
 }
 
-
-template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::insert(typename CollectionType::iterator pos, const typename CollectionType::value_type& value) {
-    return genes.insert(pos, value);
+template <typename C>
+typename Genotype<C>::CollectionType& Genotype<C>::asCollection() {
+    return genes;
 }
 
-template <typename CollectionType>
-void Genotype<CollectionType>::forEach(const std::function<void(typename CollectionType::value_type&)>& callback) {
-    std::for_each(genes.begin(), genes.end(), [&](typename CollectionType::value_type& gene) {
-        callback(gene);
-    });
+template <typename C>
+const typename Genotype<C>::CollectionType& Genotype<C>::asCollection() const {
+    return genes;
 }
-
-template <typename CollectionType>
-void Genotype<CollectionType>::reverseForEach(const std::function<void(typename CollectionType::value_type&)>& callback) {
-    std::for_each(genes.end(), genes.begin(), [&](typename CollectionType::value_type& gene) {
-        callback(gene);
-    });
-}
-
-template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::begin() {
-    return genes.begin();
-}
-
-template <typename CollectionType>
-typename CollectionType::reverse_iterator Genotype<CollectionType>::rbegin() {
-    return genes.rbegin();
-}
-
-template <typename CollectionType>
-typename CollectionType::const_iterator Genotype<CollectionType>::cbegin() const {
-    return genes.cbegin();
-}
-
-template <typename CollectionType>
-typename CollectionType::iterator Genotype<CollectionType>::end() {
-    return genes.end();
-}
-
-template <typename CollectionType>
-typename CollectionType::reverse_iterator Genotype<CollectionType>::rend() {
-    return genes.rend();
-}
-
-template <typename CollectionType>
-typename CollectionType::const_iterator Genotype<CollectionType>::cend() const {
-    return genes.cend();
-}
-
 }

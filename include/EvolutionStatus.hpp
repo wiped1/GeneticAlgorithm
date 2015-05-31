@@ -38,12 +38,12 @@ unsigned int EvolutionStatus<Genotype>::getNumberOfGenerations() {
 
 template <typename Genotype>
 double EvolutionStatus<Genotype>::getHighestFitness() {
-    return std::prev(population->cend())->second;
+    return std::prev(population->asCollection().cend())->second;
 }
 
 template <typename Genotype>
 const Genotype& EvolutionStatus<Genotype>::getGenotypeWithBestFitness() {
-    return std::prev(population->cend())->first;
+    return std::prev(population->asCollection().cend())->first;
 }
 
 template <typename Genotype>
@@ -58,7 +58,7 @@ void EvolutionStatus<Genotype>::incrementNumberOfGenerations() {
 
 template <typename Genotype>
 long EvolutionStatus<Genotype>::getPopulationSize() const {
-    return std::distance(population->cbegin(), population->cend());
+    return std::distance(population->asCollection().cbegin(), population->asCollection().cend());
 }
 
 }

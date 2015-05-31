@@ -9,8 +9,8 @@
 
 namespace gall {
 
-template <typename Genotype>
-class PopulationInitializer;
+//template <typename Genotype>
+//class PopulationInitializer;
 
 template <typename Genotype>
 struct GenotypeFitnessPairComparator {
@@ -46,22 +46,13 @@ public:
     Population(const PopulationInitializer<Genotype>& populationInitializer,
                const Evaluator<Genotype>& evaluator);
     Population(CollectionType genotypes);
-    void forEach(const std::function<void(const ValueType&)>& callback) const;
-    void reverseForEach(const std::function<void(const ValueType&)>& callback);
-    /* TODO curious recurring template pattern jako interface do wydobycia prywatnych iteratorów */
-    typename Population<Genotype>::CollectionType::iterator insert(const Genotype&);
+    CollectionType& asCollection();
+    const CollectionType& asCollection() const;
+    void insert(const Genotype& genitype);
     template <typename InputIt>
     void insert(InputIt first, InputIt last);
-    typename CollectionType::iterator begin();
-    typename CollectionType::const_iterator cbegin() const;
-    typename CollectionType::iterator end();
-    typename CollectionType::const_iterator cend() const;
-    void erase(typename Population<Genotype>::CollectionType::iterator pos);
-    void erase(typename Population<Genotype>::CollectionType::iterator begin,
-               typename Population<Genotype>::CollectionType::iterator end);
-
 private:
-    ValueType makePair(Genotype genotype);
+    ValueType makePair(Genotype& genotype);
 };
 
 template <typename Genotype>
@@ -75,45 +66,19 @@ Population<Genotype>::Population(CollectionType genotypes) : genotypes(std::move
     // do nothing
 }
 
-/*
- * Iterates through contents of genotypes std::set, calling callback function with
- * const parameters. Std::set returns const_iterators because changing underlying
- * values would cause set to invalidate
- *
- * Usage:
- *     pop.forEach([&](auto pair) {
- *         // display fitness
- *         std::cout << pair.second << std::endl;
- *     });
- */
 template <typename Genotype>
-void Population<Genotype>::forEach(const std::function<void(const ValueType&)>& callback) const {
-    #if 0
-    /* leaving for future reference */
-    /*for (auto it = genotypes.begin(); it != genotypes.end(); it++) {
-        /* WHY THE FUCK I HAVE TO CONST CAST THIS BAD BOY */
-        /* That's why the fuck i have to const cast this bad boy:
-         * set returns const references when dereferencing the iterator
-         * because std::set does not know anything about the underlying reference
-         * meaning that it would invalidate the contract if the value would have changed */
-        callback(const_cast<std::pair<Genotype, double>&>(*it));
-    }
-    #endif
-    std::for_each(genotypes.begin(), genotypes.end(), [&](auto pair) {
-        callback(pair);
-    });
+typename Population<Genotype>::CollectionType& Population<Genotype>::asCollection() {
+    return genotypes;
 }
 
 template <typename Genotype>
-void Population<Genotype>::reverseForEach(const std::function<void(const ValueType&)>& callback) {
-    std::for_each(genotypes.end(), genotypes.begin(), [&](auto pair) {
-        callback(pair);
-    });
+const typename Population<Genotype>::CollectionType& Population<Genotype>::asCollection() const {
+    return genotypes;
 }
 
 template <typename Genotype>
 typename Population<Genotype>::ValueType
-Population<Genotype>::makePair(Genotype genotype) {
+Population<Genotype>::makePair(Genotype& genotype) {
     if (evaluator == nullptr) {
         throw std::runtime_error("Population: Evaluator is not initialized.");
     }
@@ -121,9 +86,8 @@ Population<Genotype>::makePair(Genotype genotype) {
 };
 
 template <typename Genotype>
-typename Population<Genotype>::CollectionType::iterator
-Population<Genotype>::insert(const Genotype& genotype) {
-    return genotypes.insert(std::move(makePair(genotype)));
+void Population<Genotype>::insert(const Genotype& genotype) {
+    genotypes.insert(std::move(makePair(genotype)));
 };
 
 template <typename Genotype>
@@ -133,37 +97,5 @@ void Population<Genotype>::insert(InputIt first, InputIt last) {
         /* makePair invoked using this, because it's in lambda expression */
         genotypes.insert(std::move(this->makePair(genotype)));
     });
-}
-
-template <typename Genotype>
-typename Population<Genotype>::CollectionType::iterator Population<Genotype>::begin() {
-    return genotypes.begin();
-}
-
-template <typename Genotype>
-typename Population<Genotype>::CollectionType::const_iterator Population<Genotype>::cbegin() const {
-    return genotypes.cbegin();
-}
-
-template <typename Genotype>
-typename Population<Genotype>::CollectionType::iterator Population<Genotype>::end() {
-    return genotypes.end();
-}
-
-template <typename Genotype>
-typename Population<Genotype>::CollectionType::const_iterator Population<Genotype>::cend() const {
-    return genotypes.cend();
-}
-
-template <typename Genotype>
-void Population<Genotype>::erase(typename Population<Genotype>::CollectionType::iterator pos) {
-    genotypes.erase(pos);
-}
-
-template <typename Genotype>
-void Population<Genotype>::erase(typename Population<Genotype>::CollectionType::iterator begin,
-                          typename Population<Genotype>::CollectionType::iterator end) {
-    genotypes.erase(begin, end);
-}
-
+};
 }
